@@ -48,6 +48,11 @@ public final class SearchParameters {
     private final Long productId;
     private final Long categoryId;
     private final boolean isSelfUser;
+	private static final String SEARCHPARAMPATTERN = "([a-zA-Z_\\.]+(\\s)*(=|(\\s)like(\\s)|(\\s)LIKE(\\s))(\\s)*"
+			+ "((['\"]{1}[%a-zA-Z0-9\\s]+['\"]+)|([\\d]+(\\.[\\d]{1,2})?)))"
+			+ "((\\s)*((\\s)and(\\s)|(\\s)or(\\s)|(\\s)AND(\\s)|(\\s)OR(\\s))"
+			+ "(\\s)*([a-zA-Z_\\.]+(\\s)*(=|(\\s)like(\\s)|(\\s)LIKE(\\s))"
+			+ "(\\s)*((['\"]{1}[%a-zA-Z0-9\\s]+['\"]+)|([\\d]+(\\.[\\d]{1,2})?))))*";	
 
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
@@ -244,7 +249,12 @@ public final class SearchParameters {
             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
             final Long savingsId, final Boolean orphansOnly, boolean isSelfUser) {
-        this.sqlSearch = sqlSearch;
+        if(sqlSearch!=null){
+	    		this.sqlSearch = sqlSearch.matches(SEARCHPARAMPATTERN)?sqlSearch:null;
+	    } else {
+	    		this.sqlSearch = null;
+	    	}
+        
         this.officeId = officeId;
         this.externalId = externalId;
         this.name = name;
@@ -298,7 +308,11 @@ public final class SearchParameters {
             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
             final Long savingsId, final Boolean orphansOnly, final String currencyCode) {
-        this.sqlSearch = sqlSearch;
+        if(sqlSearch!=null){
+	    		this.sqlSearch = sqlSearch.matches(SEARCHPARAMPATTERN)?sqlSearch:null;
+	    } else {
+	    		this.sqlSearch = null;
+	    	}
         this.officeId = officeId;
         this.externalId = externalId;
         this.name = name;

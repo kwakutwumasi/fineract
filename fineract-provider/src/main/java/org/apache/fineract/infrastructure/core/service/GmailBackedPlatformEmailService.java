@@ -51,8 +51,8 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
                 "You must change this password upon first log in using Uppercase, Lowercase, number and character.\n" +
                 "Thank you and welcome to the organisation.";
 
-        final EmailDetail emailDetail = new EmailDetail(subject, body, address, contactName);
-        sendDefinedEmail(emailDetail);
+	    final EmailDetail emailDetail = new EmailDetail(subject, body.toString(), address, contactName);
+	    sendDefinedEmail(emailDetail);
 
     }
 

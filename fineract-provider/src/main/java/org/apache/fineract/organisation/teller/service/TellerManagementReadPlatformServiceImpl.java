@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.teller.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -71,6 +72,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final PaginationHelper<CashierTransactionData> paginationHelper = new PaginationHelper<>();
     private final ColumnValidator columnValidator;
+    private static final SimpleDateFormat sqlDateFormatter = new SimpleDateFormat("yyyyMMdd");
 
     @Autowired
     public TellerManagementReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -280,7 +282,19 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Collection<CashierData> getCashiersForTeller(Long tellerId, Date fromDate, Date toDate) {
-        return retrieveCashiersForTellers(null, tellerId);
+	    	String dateCriteria = null;
+	    	if(fromDate !=null || toDate!=null){
+	
+	    		if(toDate==null)
+	    			dateCriteria = " start_date='"+sqlDateFormatter.format(fromDate)+"' ";
+	    		else if(fromDate==null)
+	    			dateCriteria = " end_date='"+sqlDateFormatter.format(toDate)+"' ";
+	    		else
+	    			dateCriteria = " start_date >= '"+sqlDateFormatter.format(fromDate)
+	    				+"' and end_date <= '"+sqlDateFormatter.format(toDate)+"'";
+	    	}
+    	
+        return retrieveCashiersForTellers(dateCriteria, tellerId);
     }
 
     @Override
@@ -318,7 +332,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " where " + extraCriteria;
         }
-        sql = sql + " order by teller_name";
+        sql = sql + " order by start_date desc, teller_name";
         return this.jdbcTemplate.query(sql, cm, new Object[] {});
     }
 
