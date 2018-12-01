@@ -125,15 +125,15 @@ public class EmailCampaign extends AbstractPersistableCustom {
 
     @Column(name="is_visible",nullable = true)
     private boolean isVisible;
-
-    @Column(name = "previous_run_status", nullable = true)
-    private String previousRunStatus;
-
-    @Column(name = "previous_run_error_log", nullable = true)
-    private String previousRunErrorLog;
-
-    @Column(name = "previous_run_error_message", nullable = true)
-    private String previousRunErrorMessage;
+//Commented out by Kwaku Twumasi to prevent log cluttering due to missing field
+//    @Column(name = "previous_run_status", nullable = true)
+//    private String previousRunStatus;
+//
+//    @Column(name = "previous_run_error_log", nullable = true)
+//    private String previousRunErrorLog;
+//
+//    @Column(name = "previous_run_error_message", nullable = true)
+//    private String previousRunErrorMessage;
 
     public EmailCampaign() {
     }
