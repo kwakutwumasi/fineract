@@ -1,6 +1,8 @@
 Apache Fineract: A Platform for Microfinance
 ============
 
+**This branch is for rollout of B1Africa's new Core Banking Platform. Commit changes required for the rollout, and nothing else.**
+
 The next evolution of Apache Fineract focuses on being faster, lighter and cheaper to change (than the existing Mifos) so that it is more responsive to the needs of Microfinance Institutions and Integrators.
 
 Requirements
