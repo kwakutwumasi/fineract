@@ -82,46 +82,45 @@ public class CashierTransactionDataValidator {
                 transactionAmount);
     }
 
-    public void validateCashierAllowedDateAndTime(final Cashier cashier,
-            final Teller teller) {
-        Long staffId = cashier.getStaff().getId();
-        final LocalDate fromDate = new LocalDate(cashier.getStartDate());
-        final LocalDate endDate = new LocalDate(cashier.getEndDate());
-        final LocalDate tellerFromDate = teller.getStartLocalDate();
-        final LocalDate tellerEndDate = teller.getEndLocalDate();
-        /**
-         * to validate cashier date range in range of teller date range
-         */
-        if (fromDate.isBefore(tellerFromDate)
-                || endDate.isBefore(tellerFromDate)
-                || (tellerEndDate != null &&
-            (fromDate.isAfter(tellerEndDate)
-              || endDate.isAfter(tellerEndDate)))) {
-            throw new CashierDateRangeOutOfTellerDateRangeException();
-        }
-        /**
-         * to validate cashier has not been assigned for same duration
-         */
-        String sql = "select count(*) from m_cashiers c where c.staff_id = "
-                + staffId + " AND " + "(('" + fromDate
-                + "' BETWEEN c.start_date AND c.end_date OR '" + endDate
-                + "' BETWEEN c.start_date AND c.end_date )"
-                + " OR ( c.start_date BETWEEN '" + fromDate + "' AND '"
-                + endDate + "' OR c.end_date BETWEEN '" + fromDate + "' AND '"
-                + endDate + "'))";
-        if (!cashier.isFullDay()) {
-            String startTime = cashier.getStartTime();
-            String endTime = cashier.getEndTime();
-            sql = sql + " AND ( Time(c.start_time) BETWEEN TIME('" + startTime
-                    + "') and TIME('" + endTime
-                    + "') or Time(c.end_time) BETWEEN TIME('" + startTime
-                    + "') and TIME('" + endTime + "')) ";
-        }
-        int count = this.jdbcTemplate.queryForObject(sql, Integer.class);
-        if (count > 0) {
-            throw new CashierAlreadyAlloacated();
-        }
-    }
+	public void validateCashierAllowedDateAndTime(final Cashier cashier,
+			final Teller teller) {
+		Long staffId = cashier.getStaff().getId();
+		final LocalDate fromDate = new LocalDate(cashier.getStartDate());
+		final LocalDate endDate = new LocalDate(cashier.getEndDate());
+		final LocalDate tellerFromDate = teller.getStartLocalDate();
+		final LocalDate tellerEndDate = teller.getEndLocalDate();
+		/**
+		 * to validate cashier date range in range of teller date range
+		 */
+		if (fromDate.isBefore(tellerFromDate)
+				|| endDate.isBefore(tellerFromDate)
+				|| (tellerEndDate != null && (fromDate.isAfter(tellerEndDate) || endDate
+						.isAfter(tellerEndDate)))) {
+			throw new CashierDateRangeOutOfTellerDateRangeException();
+		}
+		/**
+		 * to validate cashier has not been assigned for same duration
+		 */
+		String sql = "select count(*) from m_cashiers c where c.staff_id = "
+				+ staffId + " AND " + "(('" + fromDate
+				+ "' BETWEEN c.start_date AND c.end_date OR '" + endDate
+				+ "' BETWEEN c.start_date AND c.end_date )"
+				+ " OR ( c.start_date BETWEEN '" + fromDate + "' AND '"
+				+ endDate + "' OR c.end_date BETWEEN '" + fromDate + "' AND '"
+				+ endDate + "'))";
+		if (!cashier.isFullDay()) {
+			String startTime = cashier.getStartTime();
+			String endTime = cashier.getEndTime();
+			sql = sql + " AND ( Time(c.start_time) BETWEEN TIME('" + startTime
+					+ "') and TIME('" + endTime
+					+ "') or Time(c.end_time) BETWEEN TIME('" + startTime
+					+ "') and TIME('" + endTime + "')) ";
+		}
+		int count = this.jdbcTemplate.queryForObject(sql, Integer.class);
+		if (count > 0) {
+			throw new CashierAlreadyAlloacated();
+		}
+	}
 
     public void validateOnLoanDisbursal(AppUser user, String currencyCode,
             BigDecimal transactionAmount) {
