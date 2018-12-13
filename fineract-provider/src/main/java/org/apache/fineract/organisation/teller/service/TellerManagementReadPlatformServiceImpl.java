@@ -286,12 +286,12 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 	    	if(fromDate !=null || toDate!=null){
 	
 	    		if(toDate==null)
-	    			dateCriteria = " start_date='"+sqlDateFormatter.format(fromDate)+"' ";
+	    			dateCriteria = " c.start_date='"+sqlDateFormatter.format(fromDate)+"' ";
 	    		else if(fromDate==null)
-	    			dateCriteria = " end_date='"+sqlDateFormatter.format(toDate)+"' ";
+	    			dateCriteria = " c.end_date='"+sqlDateFormatter.format(toDate)+"' ";
 	    		else
-	    			dateCriteria = " start_date >= '"+sqlDateFormatter.format(fromDate)
-	    				+"' and end_date <= '"+sqlDateFormatter.format(toDate)+"'";
+	    			dateCriteria = " c.start_date>='"+sqlDateFormatter.format(fromDate)
+	    				+"' and c.end_date<='"+sqlDateFormatter.format(toDate)+"'";
 	    	}
     	
         return retrieveCashiersForTellers(dateCriteria, tellerId);
