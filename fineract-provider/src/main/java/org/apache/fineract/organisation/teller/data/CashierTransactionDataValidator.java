@@ -102,12 +102,8 @@ public class CashierTransactionDataValidator {
 		 * to validate cashier has not been assigned for same duration
 		 */
 		String sql = "select count(*) from m_cashiers c where c.staff_id = "
-				+ staffId + " AND " + "(('" + fromDate
-				+ "' BETWEEN c.start_date AND c.end_date OR '" + endDate
-				+ "' BETWEEN c.start_date AND c.end_date )"
-				+ " OR ( c.start_date BETWEEN '" + fromDate + "' AND '"
-				+ endDate + "' OR c.end_date BETWEEN '" + fromDate + "' AND '"
-				+ endDate + "'))";
+				+ staffId + " AND c.start_date='"+ fromDate
+				+"' AND c.end_date='"+endDate+"'";
 		if (!cashier.isFullDay()) {
 			String startTime = cashier.getStartTime();
 			String endTime = cashier.getEndTime();
