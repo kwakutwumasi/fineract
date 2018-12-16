@@ -323,10 +323,14 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         String currentDate = formatterWithTime.print(DateUtils.getLocalDateTimeOfTenant());
         int iterations = 0;
         for (Map<String, Object> details : scheduleDetails) {
-            Long count = (Long) details.get("futureInstallemts");
-            if (count == null) {
+        	Number returnedCount = ((Number) details.get("futureInstallemts"));
+            Long count;
+            if (returnedCount == null) {
                 count = 0l;
+            } else {
+            	count = returnedCount.longValue();
             }
+            
             final Long savingsId = (Long) details.get("savingsId");
             final BigDecimal amount = (BigDecimal) details.get("amount");
             final String recurrence = (String) details.get("recurrence");
