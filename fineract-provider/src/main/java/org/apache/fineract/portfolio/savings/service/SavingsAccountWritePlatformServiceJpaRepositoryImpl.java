@@ -551,6 +551,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
+                .withTransactionId(transactionId.toString())
                 .build();
     }
 
@@ -1088,12 +1089,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
 
         this.payCharge(savingsAccountCharge, transactionDate, amountPaid, fmt, user);
+        
+        Long transactionId = savingsAccountCharge.savingsAccount().getTransactions()
+        		.get(savingsAccountCharge.savingsAccount().getTransactions().size()-1).getId();
+        
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("savingsTransactionId", transactionId);
+        
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsAccountCharge.getId()) //
                 .withOfficeId(savingsAccountCharge.savingsAccount().officeId()) //
                 .withClientId(savingsAccountCharge.savingsAccount().clientId()) //
                 .withGroupId(savingsAccountCharge.savingsAccount().groupId()) //
                 .withSavingsId(savingsAccountCharge.savingsAccount().getId()) //
+                .with(changes)
                 .build();
 
     }
