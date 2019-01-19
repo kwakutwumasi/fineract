@@ -665,6 +665,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
+                .withTransactionId(transactionId.toString())
                 .build();
     }
 
