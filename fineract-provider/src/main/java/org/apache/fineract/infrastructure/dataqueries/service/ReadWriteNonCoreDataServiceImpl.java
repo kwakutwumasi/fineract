@@ -20,7 +20,13 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
@@ -44,11 +50,16 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
-import org.apache.fineract.infrastructure.dataqueries.data.*;
+import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRequiredException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -61,6 +72,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.stereotype.Service;
@@ -106,6 +118,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final ConfigurationDomainService configurationDomainService;
     private final CodeReadPlatformService codeReadPlatformService;
     private final DataTableValidator dataTableValidator;
+    private final ColumnValidator columnValidator;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     // private final GlobalConfigurationWritePlatformServiceJpaRepositoryImpl
     // configurationWriteService;
@@ -114,7 +128,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public ReadWriteNonCoreDataServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context,
             final FromJsonHelper fromJsonHelper, final GenericDataService genericDataService,
             final DatatableCommandFromApiJsonDeserializer fromApiJsonDeserializer, final CodeReadPlatformService codeReadPlatformService,
-            final ConfigurationDomainService configurationDomainService, final DataTableValidator dataTableValidator) {
+            final ConfigurationDomainService configurationDomainService, final DataTableValidator dataTableValidator,
+            final ColumnValidator columnValidator) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.context = context;
@@ -125,7 +140,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         this.codeReadPlatformService = codeReadPlatformService;
         this.configurationDomainService = configurationDomainService;
         this.dataTableValidator = dataTableValidator;
+        this.columnValidator = columnValidator;
         // this.configurationWriteService = configurationWriteService;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Override
@@ -135,6 +152,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (appTable == null) {
             andClause = "";
         } else {
+        	validateAppTable(appTable);
         	SQLInjectionValidator.validateSQLInput(appTable);
             andClause = " and application_table_name = '" + appTable + "'";
         }
@@ -221,7 +239,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Transactional
     @Override
-    public void registerDatatable(final JsonCommand command, final String permissionSql) {
+	public void registerDatatable(final JsonCommand command, final String permissionSql) {
         final String applicationTableName = this.getTableName(command.getUrl());
         final String dataTableName = this.getDataTableName(command.getUrl());
 
@@ -233,24 +251,27 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    @Transactional
+	@Transactional
     private void _registerDataTable(final String applicationTableName, final String dataTableName, final Integer category,
             final String permissionsSql) {
 
         validateAppTable(applicationTableName);
+        validateDatatableName(dataTableName);
         assertDataTableExists(dataTableName);
-
-        final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name,category) values ('"
-                + dataTableName + "', '" + applicationTableName + "', '" + category + "')";
-
+       
+        Map<String, Object> paramMap = new HashMap<>(3);
+        final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name,category) values ( :dataTableName, :applicationTableName, :category)";
+        paramMap.put("dataTableName", dataTableName);
+        paramMap.put("applicationTableName", applicationTableName);
+        paramMap.put("category", category);
+        
         try {
-
-            final String[] sqlArray = { registerDatatableSql, permissionsSql };
-            this.jdbcTemplate.batchUpdate(sqlArray);
+            this.namedParameterJdbcTemplate.update(registerDatatableSql, paramMap);
+            this.jdbcTemplate.update(permissionsSql);
 
             // add the registered table to the config if it is a ppi
             if (this.isSurveyCategory(category)) {
-                this.jdbcTemplate.execute("insert into c_configuration (name, value, enabled ) values('" + dataTableName + "', '0','0')");
+                this.namedParameterJdbcTemplate.update("insert into c_configuration (name, value, enabled ) values( :dataTableName , '0','0')", paramMap);
             }
 
         }
@@ -329,6 +350,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Transactional
     @Override
     public void deregisterDatatable(final String datatable) {
+    	validateDatatableName(datatable);
         final String permissionList = "('CREATE_" + datatable + "', 'CREATE_" + datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
                 + datatable + "', 'UPDATE_" + datatable + "_CHECKER', 'DELETE_" + datatable + "', 'DELETE_" + datatable + "_CHECKER')";
 
@@ -472,6 +494,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             throw new PlatformDataIntegrityException("error.msg.datatables.datatable.null.name", "Data table name must not be blank.");
         } else if (!name.matches(DATATABLE_NAME_REGEX_PATTERN)) { throw new PlatformDataIntegrityException(
                 "error.msg.datatables.datatable.invalid.name.regex", "Invalid data table name.", name); }
+        SQLInjectionValidator.validateSQLInput(name);
     }
 
     private String datatableColumnNameToCodeValueName(final String columnName, final String code) {
@@ -1137,6 +1160,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public CommandProcessingResult deleteDatatableEntries(final String dataTableName, final Long appTableId) {
 
+		validateDatatableName(dataTableName);
         if (isDatatableAttachedToEntityDatatableCheck(dataTableName)) { throw new DatatableEntryRequiredException(dataTableName, appTableId); }
         final String appTable = queryForApplicationTableName(dataTableName);
         final CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
@@ -1151,6 +1175,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Transactional
     @Override
     public CommandProcessingResult deleteDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId) {
+		validateDatatableName(dataTableName);
         if (isDatatableAttachedToEntityDatatableCheck(dataTableName)) { throw new DatatableEntryRequiredException(dataTableName, appTableId); }
         final String appTable = queryForApplicationTableName(dataTableName);
         final CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
@@ -1183,7 +1208,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sql = sql + "select * from `" + dataTableName + "` where id = " + id;
         }
 
-        if (order != null) {
+        if (StringUtils.isNotBlank(order)) {
+            this.columnValidator.validateSqlInjection(sql, order);
             sql = sql + " order by " + order;
         }
 
