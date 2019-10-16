@@ -122,7 +122,16 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 }
             } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
                 numberOfRetries = maxNumberOfRetries + 1;
-                result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
+                /**BUG FIX: OpenJPA's StateManager, updates the CommandSource JPA instance to a previous state
+                 * during transaction roll back, erasing the transaction ID update for Maker/Checker Journal Transactions.
+                 * moving the updates here solves that problem.
+                 * @author Kwaku Twumasi<kwaku.twumasi@quakearts.com>
+                 */
+                CommandSource commandSourceResult = e.getCommandSourceResult(); 
+            	commandSourceResult.updateTransaction(command.getTransactionId());
+            	commandSourceResult.updateJsonTo(command.json());
+
+                result = this.processAndLogCommandService.logCommand(commandSourceResult);
             }
         }
 
