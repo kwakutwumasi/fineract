@@ -19,7 +19,9 @@
 package org.apache.fineract.portfolio.shareproducts.domain;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -38,6 +40,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.google.common.base.Optional;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -48,6 +51,7 @@ import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceD
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "m_share_product")
 public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
@@ -159,9 +163,9 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
         this.minimumActivePeriod = minimumActivePeriod;
         this.minimumActivePeriodType = minimumActivePeriodForDividendsType;
         setCreatedBy(createdBy);
-        setCreatedDate(createdDate);
+        setCreatedDate(Instant.ofEpochMilli(createdDate.getMillis()));
         setLastModifiedBy(lastModifiedBy);
-        setLastModifiedDate(lastModifiedDate);
+        setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.getMillis()));
         startDate = DateUtils.getDateOfTenant();
         endDate = DateUtils.getDateOfTenant();
         if (accountingRuleType != null) {
@@ -282,23 +286,26 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean setMarketPrice(Set<ShareProductMarketPriceData> marketPrice) {
-        boolean update = false;
-        for (ShareProductMarketPriceData data : marketPrice) {
-            if (data.getId() == null) {
-                ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
-                entity.setShareProduct(this);
-                this.marketPrice.add(entity);
-                update = true;
-            } else {
-                for (ShareProductMarketPrice priceData : this.marketPrice) {
-                    if (priceData.getId() == data.getId()) {
-                        priceData.setStartDate(data.getStartDate());
-                        priceData.setShareValue(data.getShareValue());
-                        update = true;
-                    }
-                }
-            }
-        }
+		boolean update = true;
+		Set<ShareProductMarketPrice> marketPriceTemp = new HashSet<ShareProductMarketPrice>();
+		if (marketPrice != null && marketPrice.size() > 0) {
+        	 for (ShareProductMarketPriceData data : marketPrice) {
+                 if (data.getId() == null) {
+                     ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
+                     entity.setShareProduct(this);
+                     marketPriceTemp.add(entity);
+				} else {
+					for (ShareProductMarketPrice priceData : this.marketPrice) {
+						if (priceData.getId().equals(data.getId())) {
+							priceData.setStartDate(data.getStartDate());
+							priceData.setShareValue(data.getShareValue());
+							marketPriceTemp.add(priceData);
+						}
+					}
+				}
+			}
+		}
+		this.marketPrice = marketPriceTemp;
         return update;
     }
 

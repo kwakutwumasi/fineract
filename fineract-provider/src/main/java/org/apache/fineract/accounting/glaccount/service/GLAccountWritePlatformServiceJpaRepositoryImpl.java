@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,8 +131,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             final Long parentId = command.longValueOfParameterNamed(GLAccountJsonInputParams.PARENT_ID.getValue());
             if (glAccountId.equals(parentId)) { throw new InvalidParentGLAccountHeadException(glAccountId, parentId); }
             // is the glAccount valid
-            final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
-            if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
+            final GLAccount glAccount = this.glAccountRepository.findById(glAccountId)
+                    .orElseThrow(() -> new GLAccountNotFoundException(glAccountId));
 
             final Map<String, Object> changesOnly = glAccount.update(command);
 
@@ -177,19 +178,21 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     }
 
     private void validateForAttachedProduct(Long glAccountId) {
-		String sql = "select count(*) from acc_product_mapping acc where acc.gl_account_id = "+glAccountId;
-		int count = this.jdbcTemplate.queryForObject(sql, Integer.class);
-		if(count>0){
-			throw new GLAccountDisableException();
+		String sql = "select count(*) from acc_product_mapping acc where acc.gl_account_id = ?";
+		try {
+			int count = this.jdbcTemplate.queryForObject(sql, Integer.class, glAccountId);
+			if (count > 0) {
+				throw new GLAccountDisableException();
+			}
+		} catch (EmptyResultDataAccessException e) {
 		}
 	}
 
 	@Transactional
     @Override
     public CommandProcessingResult deleteGLAccount(final Long glAccountId) {
-        final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
-
-        if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
+        final GLAccount glAccount = this.glAccountRepository.findById(glAccountId)
+                .orElseThrow(() -> new GLAccountNotFoundException(glAccountId));
 
         // validate this isn't a header account that has children
         if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) { throw new GLAccountInvalidDeleteException(
@@ -211,8 +214,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     private GLAccount validateParentGLAccount(final Long parentAccountId) {
         GLAccount parentGLAccount = null;
         if (parentAccountId != null) {
-            parentGLAccount = this.glAccountRepository.findOne(parentAccountId);
-            if (parentGLAccount == null) { throw new GLAccountNotFoundException(parentAccountId); }
+            parentGLAccount = this.glAccountRepository.findById(parentAccountId)
+                    .orElseThrow(() -> new GLAccountNotFoundException(parentAccountId));
             // ensure parent is not a detail account
             if (parentGLAccount.isDetailAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
         }

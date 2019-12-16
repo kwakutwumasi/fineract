@@ -131,8 +131,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             String sqlQueryCriteria = searchCriteria.getSqlSearch();
             if (StringUtils.isNotBlank(sqlQueryCriteria)) {
                 SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
-                sqlQueryCriteria = sqlQueryCriteria.replaceAll(" display_name ", " g.display_name ");
-                sqlQueryCriteria = sqlQueryCriteria.replaceAll("display_name ", "g.display_name ");
+                sqlQueryCriteria = sqlQueryCriteria.replace(" display_name ", " g.display_name ");
+                sqlQueryCriteria = sqlQueryCriteria.replace("display_name ", "g.display_name ");
                 extraCriteria.append(" and (").append(sqlQueryCriteria).append(") ");
                 this.columnValidator.validateSqlInjection(schemaSl, sqlQueryCriteria);
             }
@@ -393,6 +393,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
+            		searchParameters.getSortOrder());
+            
         }
 
         if (searchParameters.isLimited()) {
@@ -431,6 +434,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
+                		searchParameters.getSortOrder());
             }
 
             if (searchParameters.isLimited()) {
@@ -570,7 +575,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         if (staffId != null) {
             sql += " and g.staff_id=? ";
             sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";
-            sql += " group by c.id,ci.id";
+            sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] { passeddate, passeddate, passeddate, passeddate,
                     passeddate, passeddate, officeId, staffId });
         } else {

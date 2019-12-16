@@ -708,6 +708,10 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
         return this.minBalanceForInterestCalculation;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String getShortName() {
         return this.shortName;
     }
