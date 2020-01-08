@@ -166,7 +166,7 @@ public class SavingsAccountTransactionDataValidator {
         for (final String paymentDetailParameterName : paymentDetailParameters) {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
             baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
-                    .notExceedingLengthOf(50);
+                    .notExceedingLengthOf(100);
             if(paymentDetailParameterValue != null && !paymentDetailParameterValue.equals("")){
                 checkPaymentTypeDetails = true;
             }

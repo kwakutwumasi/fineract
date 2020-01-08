@@ -42,19 +42,19 @@ public final class PaymentDetail extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "payment_type_id", nullable = false)
     private PaymentType paymentType;
 
-    @Column(name = "account_number", length = 50)
+    @Column(name = "account_number", length = 100)
     private String accountNumber;
 
-    @Column(name = "check_number", length = 50)
+    @Column(name = "check_number", length = 100)
     private String checkNumber;
 
-    @Column(name = "routing_code", length = 50)
+    @Column(name = "routing_code", length = 100)
     private String routingCode;
 
-    @Column(name = "receipt_number", length = 50)
+    @Column(name = "receipt_number", length = 100)
     private String receiptNumber;
 
-    @Column(name = "bank_number", length = 50)
+    @Column(name = "bank_number", length = 100)
     private String bankNumber;
 
     protected PaymentDetail() {
