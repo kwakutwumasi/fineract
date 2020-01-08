@@ -342,7 +342,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         }
 
         return new CommandProcessingResultBuilder() //
-                .withEntityId(cashierId) //
+                .withEntityId(tellerId) //
                 .build();
     }
 
