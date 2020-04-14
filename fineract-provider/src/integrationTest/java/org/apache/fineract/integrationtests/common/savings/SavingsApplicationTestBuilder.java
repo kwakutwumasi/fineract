@@ -18,16 +18,18 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
+import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.List;
-
-import com.google.gson.Gson;
 
 public class SavingsApplicationTestBuilder {
 
     private static final String LOCALE = "en_GB";
 
     private String submittedOnDate = "";
+
+    private String externalId;
+    private boolean withdrawalFeeForTransfers;
 
     private HashMap<String, String> addParams = null;
 
@@ -37,7 +39,7 @@ public class SavingsApplicationTestBuilder {
 
         final HashMap<String, Object> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
-        if (accountType == "GROUP") {
+        if (accountType.equals("GROUP")) {
             map.put("groupId", ID);
         } else {
             map.put("clientId", ID);
@@ -45,6 +47,8 @@ public class SavingsApplicationTestBuilder {
         map.put("productId", savingsProductId);
         map.put("locale", LOCALE);
         map.put("submittedOnDate", this.submittedOnDate);
+        map.put("externalId", this.externalId);
+        map.put("withdrawalFeeForTransfers", this.withdrawalFeeForTransfers);
         if (addParams != null && addParams.size() > 0) {
             map.putAll(addParams);
         }
@@ -58,6 +62,16 @@ public class SavingsApplicationTestBuilder {
 
     public SavingsApplicationTestBuilder withSubmittedOnDate(final String savingsApplicationSubmittedDate) {
         this.submittedOnDate = savingsApplicationSubmittedDate;
+        return this;
+    }
+
+    public SavingsApplicationTestBuilder withExternalId(final String externalId) {
+        this.externalId = externalId;
+        return this;
+    }
+
+    public SavingsApplicationTestBuilder withWithdrawalFeeForTransfers(boolean withdrawalFeeForTransfers) {
+        this.withdrawalFeeForTransfers = withdrawalFeeForTransfers;
         return this;
     }
 

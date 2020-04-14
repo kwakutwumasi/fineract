@@ -18,10 +18,16 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -34,22 +40,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-
 /**
  * Test class for
  * {@link org.apache.fineract.batch.command.CommandStrategyProvider}. This tests
  * the response provided by commandStrategy by injecting it with a
  * {@code BatchRequest}.
- * 
+ *
  * @author RishabhShukla
- * 
+ *
  * @see org.apache.fineract.integrationtests.common.BatchHelper
  * @see org.apache.fineract.batch.domain.BatchRequest
  */
@@ -79,7 +77,7 @@ public class BatchApiTest {
      * Tests for the unimplemented command Strategies by returning 501 status
      * code. For a unknownRequest a statusCode 501 is returned back with
      * response.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.UnknownCommandStrategy
      */
     @Test
@@ -102,7 +100,7 @@ public class BatchApiTest {
      * Tests for the successful response for a createClient request from
      * createClientCommand. A successful response with statusCode '200' is
      * returned back.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      */
     @Test
@@ -123,7 +121,7 @@ public class BatchApiTest {
      * fails. If Query Parameter 'enclosingTransaction' is set to 'true' and if
      * one of the request in BatchRequest fails then all transactions are rolled
      * back.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      * @see org.apache.fineract.batch.api.BatchApiResource
      * @see org.apache.fineract.batch.service.BatchApiService
@@ -165,7 +163,7 @@ public class BatchApiTest {
      * Tests that a client information was successfully updated through
      * updateClientCommand. A 'changes' parameter is returned in the response
      * after successful update of client information.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy
      */
     @Test
@@ -200,7 +198,7 @@ public class BatchApiTest {
      * 200(OK) status. It creates a new client and apply a loan to that client.
      * This also verifies the successful resolution of dependencies among two
      * requests.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
      */
     @Test
@@ -249,7 +247,7 @@ public class BatchApiTest {
      * Tests that a new savings accounts was applied to an existing client and a
      * 200(OK) status was returned. It first creates a new client and a savings
      * product, then uses the cliendId and ProductId to apply a savings account.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy
      */
     @Test
@@ -292,7 +290,7 @@ public class BatchApiTest {
      * Collected properly 200(OK) status was returned for successful responses.
      * It first creates a new client and apply a loan, then creates a new charge
      * for the create loan and then fetches all the applied charges
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy
      * @see org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy
      */
@@ -340,10 +338,74 @@ public class BatchApiTest {
     }
 
     /**
+     * Tests that batch repayment for loans is happening properly.
+     * Collected properly 200(OK) status was returned for successful responses.
+     * It first creates a new loan and then makes two repayments for it
+     * and then verifies that 200(OK) is returned for the repayment requests.
+     *
+     * @see org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusForBatchRepayment() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
+
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
+
+        // Create a ApplyLoan Request
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId);
+
+        // Create a approveLoan Request
+        final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
+
+        // Create a disburseLoan Request
+        final BatchRequest br5 = BatchHelper.disburseLoanRequest(4734L, 4733L);
+
+        // Create a loanRepay Request
+        final BatchRequest br6 = BatchHelper.repayLoanRequest(4735L, 4734L);
+
+        // Create a loanRepay Request
+        final BatchRequest br7 = BatchHelper.repayLoanRequest(4736L, 4734L);
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        batchRequests.add(br1);
+        batchRequests.add(br2);
+        batchRequests.add(br3);
+        batchRequests.add(br4);
+        batchRequests.add(br5);
+        batchRequests.add(br6);
+        batchRequests.add(br7);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assert.assertEquals("Verify Status Code 200 for Repayment", 200L, (long) response.get(5).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for Repayment", 200L, (long) response.get(6).getStatusCode());
+    }
+
+    /**
      * Test for the successful activation of a pending client using
      * 'ActivateClientCommandStrategy'. A '200' status code is expected on
      * successful activation.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy
      */
     @Test
@@ -373,7 +435,7 @@ public class BatchApiTest {
      * Test for the successful approval and disbursal of a loan using
      * 'ApproveLoanCommandStrategy' and 'DisburseLoanCommandStrategy'. A '200'
      * status code is expected on successful activation.
-     * 
+     *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      */

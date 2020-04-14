@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -90,7 +89,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
         } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) { throw new AccountingRuleDuplicateException(); }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Accounting Rule: " + realCause.getMessage());
     }
@@ -335,8 +334,8 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         for (final String creditOrDebitTag : creditOrDebitTagArray) {
             if (creditOrDebitTag != null && StringUtils.isNotBlank(creditOrDebitTag)) {
                 final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);
-                final CodeValue creditOrDebitAccount = this.codeValueRepository.findOne(creditOrDebitTagIdLongValue);
-                if (creditOrDebitAccount == null) { throw new CodeValueNotFoundException(creditOrDebitTagIdLongValue); }
+                final CodeValue creditOrDebitAccount = this.codeValueRepository.findById(creditOrDebitTagIdLongValue)
+                        .orElseThrow(() -> new CodeValueNotFoundException(creditOrDebitTagIdLongValue));
                 final AccountingTagRule accountingTagRule = AccountingTagRule.create(creditOrDebitAccount, transactionType.getValue());
                 accountingTagRules.add(accountingTagRule);
             }

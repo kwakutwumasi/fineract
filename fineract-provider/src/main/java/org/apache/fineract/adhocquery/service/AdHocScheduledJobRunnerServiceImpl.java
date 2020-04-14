@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.adhocquery.service;
 
+import java.util.Collection;
+import java.util.Date;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -36,35 +38,32 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Date;
-
 @Service(value = "adHocScheduledJobRunnerService")
 public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunnerService {
 
     private final static Logger logger = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public AdHocScheduledJobRunnerServiceImpl(final RoutingDataSource dataSource,
-    		final AdHocReadPlatformService adHocReadPlatformService
+            final AdHocReadPlatformService adHocReadPlatformService
             ) {
-    	this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.adHocReadPlatformService = adHocReadPlatformService;
-       
+
     }
 
     @Transactional
     @Override
     @CronTarget(jobName = JobName.GENERATE_ADHOCCLIENT_SCEHDULE)
     public void generateClientSchedule() {
-    	final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllActiveAdHocQuery();
+        final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllActiveAdHocQuery();
         if(adhocs.size()>0){
-        	adhocs.forEach(adhoc->{
-        	    boolean run = true;
+            adhocs.forEach(adhoc->{
+                boolean run = true;
                 LocalDate next = null;
-        	    if (adhoc.getReportRunFrequency() != null) {
+                if (adhoc.getReportRunFrequency() != null) {
                     if (adhoc.getLastRun() != null) {
                         LocalDate start = adhoc.getLastRun().toLocalDate();
                         LocalDate end = new DateTime().toLocalDate();
@@ -106,20 +105,21 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             .append(adhoc.getQuery());
                     if (insertSqlBuilder.length() > 0) {
                         final int result = this.jdbcTemplate.update(insertSqlBuilder.toString());
-                        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by inserted: " + result);
+                        logger.info("{}: Results affected by inserted: {}", ThreadLocalContextUtil.getTenant().getName(), result);
 
                         this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
                     }
                 } else {
-                    logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Skipping execution of " + adhoc.getName() + ", scheduled for execution on " + next);
+                    logger.info("{}: Skipping execution of {}, scheduled for execution on {}",
+                        new Object[] { ThreadLocalContextUtil.getTenant().getName(), adhoc.getName(), next });
                 }
-            });	
+            });
         }else{
-        	logger.info(ThreadLocalContextUtil.getTenant().getName() + "Nothing to update ");
+            logger.info("{} Nothing to update", ThreadLocalContextUtil.getTenant().getName());
         }
-        
-        
-   
+
+
+
     }
 
 }

@@ -23,7 +23,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductInterestRecalculationDetails;
@@ -33,13 +32,13 @@ import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyTy
 /**
  * Entity for holding interest recalculation setting, details will be copied
  * from product directly
- * 
+ *
  * @author conflux
  */
 
 @Entity
 @Table(name = "m_loan_recalculation_details")
-public class LoanInterestRecalculationDetails extends AbstractPersistableCustom<Long> {
+public class LoanInterestRecalculationDetails extends AbstractPersistableCustom {
 
     @OneToOne
     @JoinColumn(name = "loan_id", nullable = false)

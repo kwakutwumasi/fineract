@@ -176,7 +176,7 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "last");
             break;
             default:
-                optionData = new EnumOptionData(new Integer(0).longValue(), codePrefix + type.getCode(), "invalid");
+                optionData = new EnumOptionData(Integer.valueOf(0).longValue(), codePrefix + type.getCode(), "invalid");
             break;
         }
 
@@ -610,7 +610,7 @@ public class LoanEnumerations {
         return interestRecalculationCompoundingNthDayType(NthDayType.fromInt(id));
     }
     public static EnumOptionData interestRecalculationCompoundingNthDayType(final NthDayType type) {
-    	final String codePrefix = "interestRecalculationCompounding.";
+        final String codePrefix = "interestRecalculationCompounding.";
         long nthDayValue = type.getValue().longValue();
         EnumOptionData optionData = null;
         switch (type) {
@@ -633,7 +633,7 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "last");
             break;
             default:
-                optionData = new EnumOptionData(new Integer(0).longValue(), codePrefix + type.getCode(), "invalid");
+                optionData = new EnumOptionData(Integer.valueOf(0).longValue(), codePrefix + type.getCode(), "invalid");
             break;
         }
         return optionData;

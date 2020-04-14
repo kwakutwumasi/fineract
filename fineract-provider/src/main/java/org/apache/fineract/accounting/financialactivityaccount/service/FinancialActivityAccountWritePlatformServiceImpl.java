@@ -20,9 +20,7 @@ package org.apache.fineract.accounting.financialactivityaccount.service;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
 import org.apache.fineract.accounting.financialactivityaccount.api.FinancialActivityAccountsJsonInputParams;
@@ -82,8 +80,8 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
             return CommandProcessingResult.empty();
         }catch(final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
     }
@@ -132,9 +130,9 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
             return CommandProcessingResult.empty();
         }catch(final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -156,7 +154,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
         }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }

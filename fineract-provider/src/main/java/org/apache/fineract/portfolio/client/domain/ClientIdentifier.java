@@ -20,25 +20,22 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_client_identifier", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "document_type_id", "document_key" }, name = "unique_identifier_key"),
         @UniqueConstraint(columnNames = { "client_id", "document_key", "active" }, name = "unique_active_client_identifier")})
-public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
+public class ClientIdentifier extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
@@ -50,7 +47,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "document_key", length = 1000)
     private String documentKey;
-    
+
     @Column(name = "status", nullable = false)
     private Integer status;
 
@@ -59,7 +56,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "active")
     private Integer active;
-    
+
     public static ClientIdentifier fromJson(final Client client, final CodeValue documentType, final JsonCommand command) {
         final String documentKey = command.stringValueOfParameterNamed("documentKey");
         final String description = command.stringValueOfParameterNamed("description");
@@ -77,9 +74,9 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
         this.documentKey = StringUtils.defaultIfEmpty(documentKey, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase());
-        this.active = null;      
+        this.active = null;
         if(statusEnum.isActive()){
-        	this.active = statusEnum.getValue();
+            this.active = statusEnum.getValue();
         }
         this.status = statusEnum.getValue();
     }
@@ -111,7 +108,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(descriptionParamName, newValue);
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
+
         final String statusParamName = "status";
         if(command.isChangeInStringParameterNamed(statusParamName, ClientIdentifierStatus.fromInt(this.status).getCode())){
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);

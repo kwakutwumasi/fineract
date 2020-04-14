@@ -21,13 +21,11 @@ package org.apache.fineract.portfolio.collateral.domain;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -39,7 +37,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 @Entity
 @Table(name = "m_loan_collateral")
-public class LoanCollateral extends AbstractPersistableCustom<Long> {
+public class LoanCollateral extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)

@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.commands.service;
 
+import com.google.gson.JsonElement;
 import java.util.Random;
-
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -41,8 +41,6 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.gson.JsonElement;
 
 @Service
 public class PortfolioCommandSourceWritePlatformServiceImpl implements PortfolioCommandSourceWritePlatformService {
@@ -98,14 +96,14 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
                 numberOfRetries = maxNumberOfRetries + 1;
             } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                logger.info("The following command " + command.json() + " has been retried  " + numberOfRetries + " time(s)");
+                logger.info("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
                 /***
                  * Fail if the transaction has been retired for
                  * maxNumberOfRetries
                  **/
                 if (numberOfRetries >= maxNumberOfRetries) {
-                    logger.warn("The following command " + command.json() + " has been retried for the max allowed attempts of "
-                            + numberOfRetries + " and will be rolled back");
+                    logger.warn("The following command {} has been retried for the max allowed attempts of {} and will be rolled back",
+                        command.json(), numberOfRetries);
                     throw (exception);
                 }
                 /***
@@ -159,15 +157,15 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         validateMakerCheckerTransaction(makerCheckerId);
         validateIsUpdateAllowed();
 
-        this.commandSourceRepository.delete(makerCheckerId);
+        this.commandSourceRepository.deleteById(makerCheckerId);
 
         return makerCheckerId;
     }
 
     private CommandSource validateMakerCheckerTransaction(final Long makerCheckerId) {
 
-        final CommandSource commandSourceInput = this.commandSourceRepository.findOne(makerCheckerId);
-        if (commandSourceInput == null) { throw new CommandNotFoundException(makerCheckerId); }
+        final CommandSource commandSourceInput = this.commandSourceRepository.findById(makerCheckerId)
+                .orElseThrow(() -> new CommandNotFoundException(makerCheckerId));
         if (!(commandSourceInput.isMarkedAsAwaitingApproval())) { throw new CommandNotAwaitingApprovalException(makerCheckerId); }
 
         this.context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());

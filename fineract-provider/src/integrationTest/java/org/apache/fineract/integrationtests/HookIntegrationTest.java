@@ -18,26 +18,24 @@
  */
 package org.apache.fineract.integrationtests;
 
-import org.junit.Assert;
-
 import static org.junit.Assert.fail;
 
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.fineract.integrationtests.common.HookHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.http.conn.HttpHostConnectException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 public class HookIntegrationTest {
 
@@ -62,7 +60,8 @@ public class HookIntegrationTest {
         // Subject to https://echo-webhook.herokuapp.com being up
         // See
         // http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
-        final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
+        final String uniqueId = UUID.randomUUID().toString();
+        final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "?";
         this.hookHelper.createHook(payloadURL);
         final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
         try {
@@ -94,22 +93,22 @@ public class HookIntegrationTest {
         }
 
     }
-    
+
     @Test
     public void createUpdateAndDeleteHook(){
-    	final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
-    	final String updateURL = "http://localhost";
+        final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
+        final String updateURL = "http://localhost";
 
         Long hookId = this.hookHelper.createHook(payloadURL).longValue();
         Assert.assertNotNull(hookId);
         this.hookHelper.verifyHookCreatedOnServer(hookId);
-    	System.out.println("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK-------------------------"+hookId);
-    	this.hookHelper.updateHook(updateURL, hookId);
-    	this.hookHelper.verifyUpdateHook(updateURL, hookId);
-    	System.out.println("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK-------------------------"+hookId);
-    	this.hookHelper.deleteHook(hookId);
-    	this.hookHelper.verifyDeleteHook(hookId);
-    	System.out.println("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK-------------------------"+hookId);
+        System.out.println("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK-------------------------"+hookId);
+        this.hookHelper.updateHook(updateURL, hookId);
+        this.hookHelper.verifyUpdateHook(updateURL, hookId);
+        System.out.println("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK-------------------------"+hookId);
+        this.hookHelper.deleteHook(hookId);
+        this.hookHelper.verifyDeleteHook(hookId);
+        System.out.println("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK-------------------------"+hookId);
 
     }
 }

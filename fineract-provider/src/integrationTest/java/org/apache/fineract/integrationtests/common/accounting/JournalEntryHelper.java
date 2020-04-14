@@ -18,18 +18,14 @@
  */
 package org.apache.fineract.integrationtests.common.accounting;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Assert;
-
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings("rawtypes")
 public class JournalEntryHelper {

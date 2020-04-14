@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -31,11 +30,15 @@ import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.interest.CompoundInterestHelper;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 import org.joda.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public final class SavingsHelper {
-    
+
     AccountTransfersReadPlatformService accountTransfersReadPlatformService = null;
-    
+
+    @Autowired
     public SavingsHelper(AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
     }
@@ -50,28 +53,28 @@ public final class SavingsHelper {
         LocalDate periodStartDate = startInterestCalculationLocalDate;
         LocalDate periodEndDate = periodStartDate;
         LocalDate actualPeriodStartDate = periodStartDate;
-             
+
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
-           
+
           final  LocalDate  interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
                     interestPostingUpToDate, financialYearBeginningMonth);
-           
+
             periodEndDate = interestPostingLocalDate.minusDays(1);
-            
+
             if (!postInterestAsOn.isEmpty()) {
                 for (LocalDate transactiondate : postInterestAsOn) {
-					if (periodStartDate.isBefore(transactiondate)
-							&& (periodEndDate.isAfter(transactiondate) || periodEndDate
-									.isEqual(transactiondate))) {
+                    if (periodStartDate.isBefore(transactiondate)
+                            && (periodEndDate.isAfter(transactiondate) || periodEndDate
+                                    .isEqual(transactiondate))) {
                         periodEndDate = transactiondate.minusDays(1);
                         actualPeriodStartDate = periodEndDate;
                         break;
                     }
                 }
             }
-            
+
             postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
-                     
+
             if (actualPeriodStartDate.isEqual(periodEndDate))
             {
                 periodEndDate = actualPeriodStartDate.plusDays(1);
@@ -149,9 +152,9 @@ public final class SavingsHelper {
                 }
                 periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
             break;
-        }   
+        }
         // interest posting always occurs on next day after the period end date.
-        periodEndDate = periodEndDate.plusDays(1);       
+        periodEndDate = periodEndDate.plusDays(1);
         return periodEndDate;
     }
 

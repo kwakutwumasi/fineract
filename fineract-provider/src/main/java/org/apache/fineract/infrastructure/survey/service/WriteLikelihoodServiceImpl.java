@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.survey.service;
 
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -40,7 +39,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
-    private final static Logger logger = LoggerFactory.getLogger(PovertyLineService.class);
+    private final static Logger logger = LoggerFactory.getLogger(WriteLikelihoodServiceImpl.class);
     private final PlatformSecurityContext context;
     private final LikelihoodDataValidator likelihoodDataValidator;
     private final LikelihoodRepository repository;
@@ -63,7 +62,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
             this.likelihoodDataValidator.validateForUpdate(command);
 
-            final Likelihood likelihood = this.repository.findOne(likelihoodId);
+            final Likelihood likelihood = this.repository.findById(likelihoodId).orElse(null);
 
             if (!likelihood.update(command).isEmpty()) {
                 this.repository.save(likelihood);
@@ -75,7 +74,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
                     for (Likelihood aLikelihood : likelihoods) {
                         aLikelihood.disable();
                     }
-                    this.repository.save(likelihoods);
+                    this.repository.saveAll(likelihoods);
                 }
 
             }
@@ -96,7 +95,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
     private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
 
         final Throwable realCause = dve.getMostSpecificCause();
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.likelihood.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

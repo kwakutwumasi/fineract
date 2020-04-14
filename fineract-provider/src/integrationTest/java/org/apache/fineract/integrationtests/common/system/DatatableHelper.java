@@ -20,15 +20,13 @@ package org.apache.fineract.integrationtests.common.system;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.gson.Gson;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.fineract.integrationtests.common.Utils;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 public class DatatableHelper {
 

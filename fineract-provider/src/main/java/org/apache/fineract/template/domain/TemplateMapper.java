@@ -21,12 +21,11 @@ package org.apache.fineract.template.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_templatemappers")
-public class TemplateMapper extends AbstractPersistableCustom<Long> {
+public class TemplateMapper extends AbstractPersistableCustom {
 
     @Column(name = "mapperorder")
     private int mapperorder;

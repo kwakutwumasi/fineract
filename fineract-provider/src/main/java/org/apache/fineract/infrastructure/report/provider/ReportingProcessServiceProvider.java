@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.report.provider;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
@@ -71,12 +70,12 @@ public class ReportingProcessServiceProvider implements ApplicationContextAware 
             final String[] reportServiceBeans = this.applicationContext.getBeanNamesForAnnotation(ReportService.class);
             if (ArrayUtils.isNotEmpty(reportServiceBeans)) {
                 for (final String reportName : reportServiceBeans) {
-                    LOGGER.info("Register report service '" + reportName + "' ...");
+                    LOGGER.info("Register report service '{}' ...", reportName);
                     final ReportService service = this.applicationContext.findAnnotationOnBean(reportName, ReportService.class);
                     try {
                         this.reportingProcessServices.put(service.type(), reportName);
                     } catch (final Throwable th) {
-                        LOGGER.error("Unable to register reporting service '" + reportName + "'!", th);
+                        LOGGER.error("Unable to register reporting service '{}'!", reportName, th);
                     }
                 }
             }

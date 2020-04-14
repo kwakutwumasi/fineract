@@ -104,7 +104,7 @@ public class PaginationParameters {
     }
 
     public String orderBySql() {
-        final StringBuffer sql = new StringBuffer();
+        final StringBuilder sql = new StringBuilder();
 
         if (this.isOrderByRequested()) {
             sql.append(" order by ").append(this.getOrderBy());
@@ -116,7 +116,7 @@ public class PaginationParameters {
     }
 
     public String limitSql() {
-        final StringBuffer sql = new StringBuffer();
+        final StringBuilder sql = new StringBuilder();
         if (this.isLimited()) {
             sql.append(" limit ").append(this.getLimit());
             if (this.isOffset()) {
@@ -125,16 +125,16 @@ public class PaginationParameters {
         }
         return sql.toString();
     }
-    
+
     public String paginationSql(){
-        final StringBuilder sqlBuilder = new StringBuilder(50); 
+        final StringBuilder sqlBuilder = new StringBuilder(50);
         if (this.isOrderByRequested()) {
             sqlBuilder.append(' ').append(this.orderBySql());
-        }        
+        }
         if (this.isLimited()) {
             sqlBuilder.append(' ').append(this.limitSql());
         }
-        
+
         return sqlBuilder.toString();
     }
 }

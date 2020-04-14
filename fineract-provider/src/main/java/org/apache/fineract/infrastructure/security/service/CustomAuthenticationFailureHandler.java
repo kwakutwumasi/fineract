@@ -19,14 +19,12 @@
 package org.apache.fineract.infrastructure.security.service;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -37,7 +35,7 @@ import org.springframework.util.Assert;
 
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    protected final Log logger = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private String defaultFailureUrl;
     private boolean forwardToDestination = false;
@@ -65,11 +63,11 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             saveException(request, exception);
 
             if (this.forwardToDestination) {
-                this.logger.debug("Forwarding to " + this.defaultFailureUrl);
+                this.logger.debug("Forwarding to {}", this.defaultFailureUrl);
 
                 request.getRequestDispatcher(this.defaultFailureUrl).forward(request, response);
             } else {
-                this.logger.debug("Redirecting to " + this.defaultFailureUrl);
+                this.logger.debug("Redirecting to {}", this.defaultFailureUrl);
 
                 final String oauthToken = request.getParameter("oauth_token");
                 request.setAttribute("oauth_token", oauthToken);
@@ -101,7 +99,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     /**
      * The URL which will be used as the failure destination.
-     * 
+     *
      * @param defaultFailureUrl
      *            the failure URL, for example "/loginFailed.jsp".
      */

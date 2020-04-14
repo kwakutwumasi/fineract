@@ -18,28 +18,35 @@
  */
 package org.apache.fineract.infrastructure.hooks.domain;
 
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.configParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.displayNameParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.eventsParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.isActiveParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.templateIdParamName;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.template.domain.Template;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.util.CollectionUtils;
-
-import javax.persistence.*;
-
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.template.domain.Template;
+import org.springframework.util.CollectionUtils;
 
 @Entity
 @Table(name = "m_hook")
-public class Hook extends AbstractAuditableCustom<AppUser, Long> {
+public class Hook extends AbstractAuditableCustom {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;

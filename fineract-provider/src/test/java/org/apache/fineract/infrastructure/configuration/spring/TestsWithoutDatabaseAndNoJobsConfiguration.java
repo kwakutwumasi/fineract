@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.configuration.spring;
 
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfiguration;
 import org.apache.fineract.infrastructure.core.service.TenantDatabaseUpgradeService;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
@@ -40,7 +39,7 @@ public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicat
      */
     @Bean
     public TenantDatabaseUpgradeService tenantDatabaseUpgradeService() {
-        return new TenantDatabaseUpgradeService(null, null, null) {
+        return new TenantDatabaseUpgradeService(null, null) {
             @Override
             public void upgradeAllTenants() {
                 // NOOP
@@ -63,7 +62,7 @@ public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicat
      * DataSource with Mockito RETURNS_MOCKS black magic.
      */
     @Bean
-    public DataSource tenantDataSourceJndi() {
+    public DataSource hikariTenantDataSource() {
         DataSource mockDataSource = Mockito.mock(DataSource.class, Mockito.RETURNS_MOCKS);
         return mockDataSource;
     }

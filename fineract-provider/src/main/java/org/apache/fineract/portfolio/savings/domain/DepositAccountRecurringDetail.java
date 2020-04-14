@@ -26,14 +26,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -45,7 +43,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_deposit_account_recurring_detail")
-public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Long> {
+public class DepositAccountRecurringDetail extends AbstractPersistableCustom {
 
     @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal mandatoryRecommendedDepositAmount;
@@ -67,7 +65,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
     private SavingsAccount account;
 
     /**
-     * 
+     *
      */
     public DepositAccountRecurringDetail() {
         this.noOfOverdueInstallments = 0;

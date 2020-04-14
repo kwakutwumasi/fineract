@@ -22,7 +22,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -31,7 +30,7 @@ import org.apache.fineract.infrastructure.security.constants.TwoFactorConfigurat
 @Entity
 @Table(name = "twofactor_configuration",
         uniqueConstraints = {@UniqueConstraint(columnNames = { "name" }, name = "name_UNIQUE")})
-public class TwoFactorConfiguration extends AbstractPersistableCustom<Long> {
+public class TwoFactorConfiguration extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, length = 32)
     private String name;

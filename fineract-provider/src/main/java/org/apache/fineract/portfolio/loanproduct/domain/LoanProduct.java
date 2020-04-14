@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +30,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -44,10 +45,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -60,26 +61,23 @@ import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 /**
  * Loan products allow for categorisation of an organisations loans into
  * something meaningful to them.
- * 
+ *
  * They provide a means of simplifying creation/maintenance of loans. They can
  * also allow for product comparison to take place when reporting.
- * 
+ *
  * They allow for constraints to be added at product level.
  */
 @Entity
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
         @UniqueConstraint(columnNames = { "short_name" }, name = "unq_short_name") })
-public class LoanProduct extends AbstractPersistableCustom<Long> {
+public class LoanProduct extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "fund_id", nullable = true)
@@ -101,6 +99,10 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_product_loan_charge", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
     private List<Charge> charges;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "m_product_loan_rate", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "rate_id"))
+    private List<Rate> rates;
 
     @Embedded
     private LoanProductRelatedDetail loanProductRelatedDetail;
@@ -175,19 +177,20 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanProductVariableInstallmentConfig variableInstallmentConfig;
-    
+
     @Column(name = "sync_expected_with_disbursement_date")
     private boolean syncExpectedWithDisbursementDate;
 
 
     @Column(name = "can_use_for_topup", nullable = false)
     private boolean canUseForTopup = false;
-    
+
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
-            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
+            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
+            final List<Rate> productRates) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.shortName);
@@ -331,12 +334,12 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
 
         final boolean syncExpectedWithDisbursementDate = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
-        
-        
-		final boolean canUseForTopup = command.parameterExists(LoanProductConstants.canUseForTopup)
-				? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
-				: false;
-				
+
+
+        final boolean canUseForTopup = command.parameterExists(LoanProductConstants.canUseForTopup)
+                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
+                : false;
+
         final boolean isEqualAmortization = command.parameterExists(LoanProductConstants.isEqualAmortizationParam) ? command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isEqualAmortizationParam) : false;
 
@@ -353,7 +356,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate,
                 interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGapBetweenInstallments,
-                maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
+                maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, productRates);
 
     }
 
@@ -583,7 +586,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
-            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization) {
+            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization, final List<Rate> rates) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -657,10 +660,14 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
-        this.syncExpectedWithDisbursementDate = 
-        		syncExpectedWithDisbursementDate;
+        this.syncExpectedWithDisbursementDate =
+                syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
+
+        if(rates != null){
+            this.rates = rates;
+        }
     }
 
     public MonetaryCurrency getCurrency() {
@@ -698,6 +705,25 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         } else {
             updated = true;
             this.charges = newProductCharges;
+        }
+        return updated;
+    }
+
+    public boolean updateRates(final List<Rate> newProductRates) {
+        if (newProductRates == null) { return false; }
+
+        boolean updated = false;
+        if (this.rates != null) {
+            final Set<Rate> currentSetOfCharges = new HashSet<>(this.rates);
+            final Set<Rate> newSetOfCharges = new HashSet<>(newProductRates);
+
+            if (!currentSetOfCharges.equals(newSetOfCharges)) {
+                updated = true;
+                this.rates = newProductRates;
+            }
+        } else {
+            updated = true;
+            this.rates = newProductRates;
         }
         return updated;
     }
@@ -883,12 +909,12 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             actualChanges.put("locale", localeAsInput);
             this.minimumDaysBetweenDisbursalAndFirstRepayment = newValue;
         }
-        
+
         if(command.isChangeInBooleanParameterNamed("syncExpectedWithDisbursementDate"
-        		, this.syncExpectedWithDisbursementDate)){
-        	final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
-        	actualChanges.put("syncExpectedWithDisbursementDate", newValue);
-        	this.syncExpectedWithDisbursementDate = newValue;
+                , this.syncExpectedWithDisbursementDate)){
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
+            actualChanges.put("syncExpectedWithDisbursementDate", newValue);
+            this.syncExpectedWithDisbursementDate = newValue;
         }
 
         /**
@@ -1046,6 +1072,13 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             this.canUseForTopup = newValue;
         }
 
+        if (command.hasParameter(LoanProductConstants.ratesParamName)) {
+            final JsonArray jsonArray = command.arrayOfParameterNamed(LoanProductConstants.ratesParamName);
+            if (jsonArray != null) {
+                actualChanges.put(LoanProductConstants.ratesParamName, command.jsonFragment(LoanProductConstants.ratesParamName));
+            }
+        }
+
         return actualChanges;
     }
 
@@ -1192,16 +1225,16 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         }
         return borrowerCycleVariation;
     }
-    
+
     public boolean syncExpectedWithDisbursementDate() {
-		return syncExpectedWithDisbursementDate;
-	}
+        return syncExpectedWithDisbursementDate;
+    }
 
-	public void setSyncExpectedWithDisbursementDate(boolean syncExpectedWithDisbursementDate) {
-		this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
-	}
+    public void setSyncExpectedWithDisbursementDate(boolean syncExpectedWithDisbursementDate) {
+        this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
+    }
 
-	public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
+    public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
         Map<String, BigDecimal> borrowerCycleVariations = new HashMap<>();
         borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
         borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,
@@ -1234,7 +1267,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             Integer interestCycleUsed = 0;
             Integer repaymentCycleUsed = 0;
             for (LoanProductBorrowerCycleVariations cycleVariation : this.borrowerCycleVariations) {
-                if (cycleVariation.getBorrowerCycleNumber() == cycleNumber
+                if (cycleVariation.getBorrowerCycleNumber().equals(cycleNumber)
                         && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.EQUAL)) {
                     switch (cycleVariation.getParamType()) {
                         case PRINCIPAL:
@@ -1380,6 +1413,15 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     public void setEqualAmortization(boolean isEqualAmortization) {
         this.isEqualAmortization = isEqualAmortization;
+    }
+
+
+    public List<Rate> getRates() {
+        return rates;
+    }
+
+    public void setRates(List<Rate> rates) {
+        this.rates = rates;
     }
 
 }

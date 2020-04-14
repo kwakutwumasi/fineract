@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -205,7 +204,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
 
         Collection<ShareProductMarketPriceData> shareMarketCollection;
         Collection<ChargeData> charges;
-        private StringBuffer buff = new StringBuffer();
+        private StringBuilder buff = new StringBuilder();
 
         ShareProductRowMapper(Collection<ShareProductMarketPriceData> shareMarketCollection, Collection<ChargeData> charges) {
             this.shareMarketCollection = shareMarketCollection;

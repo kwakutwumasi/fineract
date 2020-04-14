@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
+import com.lowagie.text.pdf.codec.Base64;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
@@ -34,8 +34,6 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lowagie.text.pdf.codec.Base64;
 
 public class FileSystemContentRepository implements ContentRepository {
 
@@ -95,7 +93,7 @@ public class FileSystemContentRepository implements ContentRepository {
         final boolean fileDeleted = deleteFile(location);
         if (!fileDeleted) {
             // no need to throw an Error, simply log a warning
-            logger.warn("Unable to delete image associated with clients with Id " + resourceId);
+            logger.warn("Unable to delete image associated with clients with Id {}", resourceId);
         }
     }
 
@@ -130,7 +128,7 @@ public class FileSystemContentRepository implements ContentRepository {
 
     /**
      * Generate the directory path for storing the new document
-     * 
+     *
      * @param entityType
      * @param entityId
      * @return

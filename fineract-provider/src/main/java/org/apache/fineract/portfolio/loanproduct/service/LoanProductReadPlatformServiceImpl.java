@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -43,6 +42,8 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductInterestRecalcu
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.apache.fineract.portfolio.rate.data.RateData;
+import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -56,16 +57,18 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final ChargeReadPlatformService chargeReadPlatformService;
+    private final RateReadService rateReadService;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
 
     @Autowired
     public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeReadPlatformService chargeReadPlatformService, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil) {
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
+        this.rateReadService=rateReadService;
     }
 
     @Override
@@ -73,8 +76,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         try {
             final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProductId);
+            final Collection<RateData> rates = this.rateReadService.retrieveProductLoanRates(loanProductId);
             final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(loanProductId);
-            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas);
+            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
@@ -96,7 +100,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null, null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null);
 
         String sql = "select " + rm.loanProductSchema();
 
@@ -173,10 +177,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         private final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas;
 
+        private final Collection<RateData> rates;
+
         public LoanProductMapper(final Collection<ChargeData> charges,
-                final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas) {
+                final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas, final Collection<RateData> rates) {
             this.charges = charges;
             this.borrowerCycleVariationDatas = borrowerCycleVariationDatas;
+            this.rates = rates;
         }
 
         public String loanProductSchema() {
@@ -309,7 +316,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final int amortizationTypeId = JdbcSupport.getInteger(rs, "amortizationMethod");
             final EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeId);
             final boolean isEqualAmortization = rs.getBoolean("isEqualAmortization");
-            
+
             final Integer interestRateFrequencyTypeId = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
             final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeId);
 
@@ -415,7 +422,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                         interestRecalculationCompoundingType, rescheduleStrategyType, restFrequencyType, restFrequencyInterval,
                         restFrequencyNthDayEnum, restFrequencyWeekDayEnum, restFrequencyOnDay, compoundingFrequencyType,
                         compoundingInterval, compoundingFrequencyNthDayEnum, compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay,
-                        isArrearsBasedOnOriginalSchedule, isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, 
+                        isArrearsBasedOnOriginalSchedule, isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy,
                         allowCompoundingOnEod);
             }
 
@@ -447,8 +454,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final BigDecimal principalThresholdForLastInstallment = rs.getBigDecimal("principalThresholdForLastInstallment");
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = rs.getBoolean("accountMovesOutOfNPAOnlyOnArrearsCompletion");
             final boolean syncExpectedWithDisbursementDate = rs.getBoolean("syncExpectedWithDisbursementDate");
-            
+
             final boolean canUseForTopup = rs.getBoolean("canUseForTopup");
+            final Collection<RateData> rateOptions= null;
+            final boolean isRatesEnabled = false;
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -465,7 +474,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     installmentAmountInMultiplesOf, allowAttributeOverrides, isLinkedToFloatingInterestRates, floatingRateId,
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
-                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
+                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates, isRatesEnabled);
         }
     }
 
@@ -535,7 +544,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductData> retrieveAllLoanProductsForCurrency(String currencyCode) {
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null, null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null);
 
         String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
 
@@ -621,7 +630,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
     }
-    
+
     @Override
     public LoanProductData retrieveLoanProductFloatingDetails(final Long loanProductId) {
 
@@ -635,14 +644,14 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             throw new LoanProductNotFoundException(loanProductId);
         }
     }
-    
-    
+
+
     private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
 
         public LoanProductFloatingRateMapper() {}
 
         public String schema() {
-            return "lp.id as id,  lp.name as name," 
+            return "lp.id as id,  lp.name as name,"
                     + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
                     + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
                     + "lfr.interest_rate_differential as interestRateDifferential, "

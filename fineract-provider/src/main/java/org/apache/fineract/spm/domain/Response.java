@@ -18,13 +18,17 @@
  */
 package org.apache.fineract.spm.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "m_survey_responses")
-public class Response extends AbstractPersistableCustom<Long> {
+public class Response extends AbstractPersistableCustom {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")

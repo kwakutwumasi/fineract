@@ -19,12 +19,12 @@
 package org.apache.fineract.common;
 
 import com.google.common.base.Preconditions;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 /**
  * REST integration tests helper. Intended to encapsulate the current
@@ -34,36 +34,36 @@ import com.jayway.restassured.specification.ResponseSpecification;
  */
 public class RestAssuredFixture {
 
-	private final int httpPort;
+    private final int httpPort;
 
-	private ResponseSpecification responseSpec;
-	private RequestSpecification requestSpec;
+    private ResponseSpecification responseSpec;
+    private RequestSpecification requestSpec;
 
-	public RestAssuredFixture(int httpPort) {
-		super();
-		this.httpPort = httpPort;
-		Utils.initializeRESTAssured();
-		RestAssured.port = httpPort;
-		this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-		this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-		this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-	}
+    public RestAssuredFixture(int httpPort) {
+        super();
+        this.httpPort = httpPort;
+        Utils.initializeRESTAssured();
+        RestAssured.port = httpPort;
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+    }
 
-	public <T> T httpGet(String apiPath, String jsonAttributeToGetBack) {
-		return Utils.performServerGet(this.requestSpec, this.responseSpec, getApiPath(apiPath), jsonAttributeToGetBack);
-	}
+    public <T> T httpGet(String apiPath, String jsonAttributeToGetBack) {
+        return Utils.performServerGet(this.requestSpec, this.responseSpec, getApiPath(apiPath), jsonAttributeToGetBack);
+    }
 
-	public <T> T httpGet(String apiPath) {
-		return httpGet(apiPath, "");
-	}
+    public <T> T httpGet(String apiPath) {
+        return httpGet(apiPath, "");
+    }
 
-	private String getApiPath(String apiPath) {
+    private String getApiPath(String apiPath) {
         Preconditions.checkArgument(apiPath.startsWith("/"), "trailingApiUrl must start with slash: " + apiPath);
         return "/fineract-provider/api/v1" + apiPath + "?tenantIdentifier=default";
-	}
+    }
 
-	protected String getApiUrl(String apiPath) {
-		return "http://localhost:" + httpPort + getApiPath(apiPath);
+    protected String getApiUrl(String apiPath) {
+        return "http://localhost:" + httpPort + getApiPath(apiPath);
     }
 
 }

@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.notification.domain;
 
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "notification_generator")
-public class Notification extends AbstractPersistableCustom<Long> {
+public class Notification extends AbstractPersistableCustom {
 
     @Column(name = "object_type")
     private String objectType;

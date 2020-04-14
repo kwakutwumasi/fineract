@@ -18,11 +18,12 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -36,7 +37,11 @@ import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks;
 import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecksRepository;
-import org.apache.fineract.infrastructure.dataqueries.exception.*;
+import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRequiredException;
+import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
+import org.apache.fineract.infrastructure.dataqueries.exception.EntityDatatableCheckAlreadyExistsException;
+import org.apache.fineract.infrastructure.dataqueries.exception.EntityDatatableCheckNotSupportedException;
+import org.apache.fineract.infrastructure.dataqueries.exception.EntityDatatableChecksNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -47,10 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 @Service
 public class EntityDatatableChecksWritePlatformServiceImpl implements EntityDatatableChecksWritePlatformService {
@@ -104,7 +105,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             final String foreignKeyColumnName = EntityTables.getForeignKeyColumnNameOnDatatable(entity);
             final boolean columnExist = datatableData.hasColumn(foreignKeyColumnName);
 
-            logger.info(datatableData.getRegisteredTableName() + "has column " + foreignKeyColumnName + " ? " + columnExist);
+            logger.info("{} has column {} ? {}", new Object[] { datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist });
 
             if (!columnExist) { throw new EntityDatatableCheckNotSupportedException(datatableData.getRegisteredTableName(), entity); }
 
@@ -162,7 +163,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 final String datatableName = t.getDatatableName();
                 final Long countEntries = readWriteNonCoreDataService.countDatatableEntries(datatableName, entityId, foreignKeyColumn);
 
-                logger.info("The are " + countEntries + " entries in the table " + datatableName);
+                logger.info("The are {} entries in the table {}", countEntries, datatableName);
                 if (countEntries.intValue() == 0) {
                     reqDatatables.add(datatableName);
                 }
@@ -188,7 +189,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 final String datatableName = t.getDatatableName();
                 final Long countEntries = readWriteNonCoreDataService.countDatatableEntries(datatableName, entityId, foreignKeyColumn);
 
-                logger.info("The are " + countEntries + " entries in the table " + datatableName);
+                logger.info("The are {} entries in the table {}", countEntries, datatableName);
                 if (countEntries.intValue() == 0) {
                     reqDatatables.add(datatableName);
                 }
@@ -258,8 +259,8 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
     @Override
     public CommandProcessingResult deleteCheck(final Long entityDatatableCheckId) {
 
-        final EntityDatatableChecks check = this.entityDatatableChecksRepository.findOne(entityDatatableCheckId);
-        if (check == null) { throw new EntityDatatableChecksNotFoundException(entityDatatableCheckId); }
+        final EntityDatatableChecks check = this.entityDatatableChecksRepository.findById(entityDatatableCheckId)
+                .orElseThrow(() -> new EntityDatatableChecksNotFoundException(entityDatatableCheckId));
 
         this.entityDatatableChecksRepository.delete(check);
 
@@ -288,7 +289,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName, productId);
         }
 
-        logger.error(dae.getMessage(), dae);
+        logger.error("Error occured.", dae);
         throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

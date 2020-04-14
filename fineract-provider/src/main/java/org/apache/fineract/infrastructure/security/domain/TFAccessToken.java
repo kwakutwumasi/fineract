@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.security.domain;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -28,7 +27,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.data.AccessTokenData;
@@ -39,7 +37,7 @@ import org.joda.time.LocalDateTime;
 @Entity
 @Table(name = "twofactor_access_token",
         uniqueConstraints = {@UniqueConstraint(columnNames = { "token", "appuser_id" }, name = "token_appuser_UNIQUE")})
-public class TFAccessToken extends AbstractPersistableCustom<Long> {
+public class TFAccessToken extends AbstractPersistableCustom {
 
     @Column(name = "token", nullable = false, length = 32)
     private String token;

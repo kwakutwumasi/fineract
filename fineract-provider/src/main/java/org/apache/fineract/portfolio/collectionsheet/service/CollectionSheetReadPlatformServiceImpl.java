@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -132,7 +131,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         Long prevGroupId = null;
         Long prevClientId = null;
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
-                
+
 
         final List<JLGGroupData> jlgGroupsData = new ArrayList<>();
         List<JLGClientData> clientsData = new ArrayList<>();
@@ -216,7 +215,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private static final class JLGCollectionSheetFaltDataMapper implements RowMapper<JLGCollectionSheetFlatData> {
 
         public String collectionSheetSchema(final boolean isCenterCollection) {
-            StringBuffer sql = new StringBuffer(400);
+            StringBuilder sql = new StringBuilder(400);
             sql.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue from ")
                     .append("(SELECT gp.display_name As groupName, ")
                     .append("gp.id As groupId, ")
@@ -260,7 +259,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 sql.append("WHERE gp.id = :groupId ");
             }
             sql.append("and (ln.loan_status_id != 200 AND ln.loan_status_id != 100) ");
-            
+
             sql.append("and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
                     .append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
                     .append("GROUP BY gp.id, cl.id, ln.id, ca.attendance_type_enum ORDER BY gp.id , cl.id , ln.id ")
@@ -335,17 +334,17 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final Calendar calendar = this.calendarRepositoryWrapper.findOneWithNotFoundDetection(calendarId);
         // check if transaction against calendar effective from date
-        
+
         final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
-        
+
         // entityType should be center if it's within a center
         final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
-        
+
         Long entityId = null;
         if(group.isChildGroup()){
-        	entityId = group.getParentId();
+            entityId = group.getParentId();
         }else{
-        	entityId = group.getId();
+            entityId = group.getId();
         }
 
         Boolean isSkipMeetingOnFirstDay = false;
@@ -353,8 +352,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if(isSkipRepaymentOnFirstMonthEnabled){
             numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
-            isSkipMeetingOnFirstDay = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(entityId, calendar.getId(), 
-            		entityType.getValue().longValue());
+            isSkipMeetingOnFirstDay = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(entityId, calendar.getId(),
+                    entityType.getValue().longValue());
         }
 
         if (!calendar.isValidRecurringDate(transactionDate, isSkipMeetingOnFirstDay, numberOfDays)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"
@@ -364,7 +363,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
 
-        
+
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
@@ -499,7 +498,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         public String collectionSheetSchema(final boolean isCenterCollection) {
 
-            final StringBuffer sql = new StringBuffer(400);
+            final StringBuilder sql = new StringBuilder(400);
             sql.append("SELECT gp.display_name As groupName, ")
                     .append("gp.id As groupId, ")
                     .append("cl.display_name As clientName, ")
@@ -723,7 +722,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         // merge savings data into loan data
         mergeLoanData(collectionSheetFlatDatas, (List<IndividualClientData>) clientData);
-        
+
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
 
         return IndividualCollectionSheetData.instance(transactionDate, clientData, paymentOptions);
@@ -821,7 +820,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         public IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId) {
 
-            final StringBuffer sb = new StringBuffer(400);
+            final StringBuilder sb = new StringBuilder(400);
             sb.append("SELECT if(sa.deposit_type_enum=100,'Saving Deposit',if(sa.deposit_type_enum=300,'Recurring Deposit','Current Deposit')) as depositAccountType, cl.display_name As clientName, cl.id As clientId, ");
             sb.append("sa.id As savingsId, sa.account_no As accountId, sa.status_enum As accountStatusId, ");
             sb.append("sp.short_name As productShortName, sp.id As productId, ");

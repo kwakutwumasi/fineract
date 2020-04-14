@@ -21,14 +21,13 @@ package org.apache.fineract.infrastructure.documentmanagement.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 
 @Entity
 @Table(name = "m_document")
-public class Document extends AbstractPersistableCustom<Long> {
+public class Document extends AbstractPersistableCustom {
 
     @Column(name = "parent_entity_type", length = 50)
     private String parentEntityType;

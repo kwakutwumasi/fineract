@@ -19,16 +19,14 @@
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
 import java.math.BigDecimal;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_share_account_dividend_details")
-public class ShareAccountDividendDetails extends AbstractPersistableCustom<Long> {
+public class ShareAccountDividendDetails extends AbstractPersistableCustom {
 
     @Column(name = "account_id", nullable = false)
     private Long shareAccountId;

@@ -23,12 +23,11 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "stretchy_report_parameter")
-public final class ReportParameterUsage extends AbstractPersistableCustom<Long> {
+public final class ReportParameterUsage extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "report_id", nullable = false)
@@ -86,8 +85,8 @@ public final class ReportParameterUsage extends AbstractPersistableCustom<Long> 
     public void updateParameterName(final String parameterName) {
         this.reportParameterName = parameterName;
     }
-	
-	public String getReportParameterName() {
-		return this.reportParameterName;
-	}
+
+    public String getReportParameterName() {
+        return this.reportParameterName;
+    }
 }

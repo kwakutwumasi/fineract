@@ -18,12 +18,17 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,10 +37,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 import javax.ws.rs.core.StreamingOutput;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -60,11 +63,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
-
-import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
 
 @Service
 public class ReadReportingServiceImpl implements ReadReportingService {
@@ -93,19 +91,19 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-	public StreamingOutput retrieveReportCSV(final String name, final String type,
-			final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
+    public StreamingOutput retrieveReportCSV(final String name, final String type,
+            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
 
-		return new StreamingOutput() {
+        return new StreamingOutput() {
 
             @Override
             public void write(final OutputStream out) {
                 try {
 
                     final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
-                    final StringBuffer sb = generateCsvFileBuffer(result);
+                    final StringBuilder sb = generateCsvFileBuffer(result);
 
-                    final InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+                    final InputStream in = new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
 
                     final byte[] outputByte = new byte[4096];
                     Integer readLen = in.read(outputByte, 0, 4096);
@@ -125,11 +123,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     }
 
-    private StringBuffer generateCsvFileBuffer(final GenericResultsetData result) {
-        final StringBuffer writer = new StringBuffer();
+    private StringBuilder generateCsvFileBuffer(final GenericResultsetData result) {
+        final StringBuilder writer = new StringBuilder();
 
         final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-        logger.info("NO. of Columns: " + columnHeaders.size());
+        logger.info("NO. of Columns: {}", columnHeaders.size());
         final Integer chSize = columnHeaders.size();
         for (int i = 0; i < chSize; i++) {
             writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
@@ -147,7 +145,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         String currVal;
         final String doubleQuote = "\"";
         final String twoDoubleQuotes = doubleQuote + doubleQuote;
-        logger.info("NO. of Rows: " + data.size());
+        logger.info("NO. of Rows: {}", data.size());
         for (int i = 0; i < data.size(); i++) {
             row = data.get(i).getRow();
             rSize = row.size();
@@ -175,30 +173,30 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-	public GenericResultsetData retrieveGenericResultset(final String name, final String type,
-			final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
+    public GenericResultsetData retrieveGenericResultset(final String name, final String type,
+            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
 
         final long startTime = System.currentTimeMillis();
-        logger.info("STARTING REPORT: " + name + "   Type: " + type);
+        logger.info("STARTING REPORT: {}   Type: {}", name, type);
 
         final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING Report/Request Name: " + name + " - " + type + "     Elapsed Time: " + elapsed);
+        logger.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
         return result;
     }
 
-	private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
-			final boolean isSelfServiceUserReport) {
+    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
+            final boolean isSelfServiceUserReport) {
 
         String sql = getSql(name, type);
 
         final Set<String> keys = queryParams.keySet();
         for (final String key : keys) {
             final String pValue = queryParams.get(key);
-            // logger.info("(" + key + " : " + pValue + ")");
+            // logger.info("({} : {})", key, pValue);
             sql = this.genericDataService.replace(sql, key, pValue);
         }
 
@@ -209,21 +207,21 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // (typically used to return report lists containing only reports
         // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
-        
-		sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
-				Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
-		sql = this.genericDataService.wrapSQL(sql);
+        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
+                Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
-		return sql;
+        sql = this.genericDataService.wrapSQL(sql);
 
-	}
+        return sql;
+
+    }
 
     private String getSql(final String name, final String type) {
 
         final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
         validateReportName(name);
-        
+
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
         // the return statement contains the exact sql required
@@ -239,7 +237,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "' and self_service_user_report = ?";
         validateReportName(reportName);
         this.columnValidator.validateSqlInjection(sql, reportName);
-        
+
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object [] {isSelfServiceUserReport});
@@ -249,8 +247,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-	public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
-			final boolean isSelfServiceUserReport) {
+    public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
+            final boolean isSelfServiceUserReport) {
 
         final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
@@ -266,7 +264,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final List<ResultsetRowData> data = result.getData();
             List<String> row;
 
-            logger.info("NO. of Columns: " + columnHeaders.size());
+            logger.info("NO. of Columns: {}", columnHeaders.size());
             final Integer chSize = columnHeaders.size();
 
             final Document document = new Document(PageSize.B0.rotate());
@@ -287,7 +285,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             Integer rSize;
             String currColType;
             String currVal;
-            logger.info("NO. of Rows: " + data.size());
+            logger.info("NO. of Rows: {}", data.size());
             for (int i = 0; i < data.size(); i++) {
                 row = data.get(i).getRow();
                 rSize = row.size();
@@ -310,7 +308,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             document.close();
             return genaratePdf;
         } catch (final Exception e) {
-            logger.error("error.msg.reporting.error:" + e.getMessage());
+            logger.error("error.msg.reporting.error:", e);
             throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
         }
     }
@@ -509,17 +507,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> queryParams) {
         final long startTime = System.currentTimeMillis();
-        logger.info("STARTING REPORT: " + name + "   Type: " + type);
+        logger.info("STARTING REPORT: {}   Type: {}", name, type);
 
         final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING Report/Request Name: " + name + " - " + type + "     Elapsed Time: " + elapsed);
+        logger.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
         return result;
     }
-    
+
     @Override
     public String sqlToRunForSmsEmailCampaign(final String name, final String type, final Map<String, String> queryParams) {
         String sql = getSql(name, type);
@@ -556,7 +554,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final String reportPath = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "pentahoReports" + File.separator
                 + reportName + ".prpt";
-        logger.info("Report path: " + reportPath);
+        logger.info("Report path: {}", reportPath);
 
         // load report definition
         final ResourceManager manager = new ResourceManager();
@@ -567,7 +565,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             res = manager.createDirectly(reportPath, MasterReport.class);
             final MasterReport masterReport = (MasterReport) res.getResource();
             final DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
-            
+
             if (locale != null) {
                 reportEnvironment.setLocale(locale);
             }
@@ -594,7 +592,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 HtmlReportUtil.createStreamHTML(masterReport, baos);
                 return baos;
             }
-            
+
         } catch (final ResourceException e) {
             errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ResourceException "
                     + "exception: " + e.getMessage() + " ---------- ");
@@ -612,15 +610,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a PlatformDataIntegrityException "
                 + "exception: No matching Output Type: " + outputType + " ---------- ");
         throw new PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
-        
+
     */
         return null ;
     }
-    
-	private void validateReportName(final String name) {
 
-		if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
-			throw new SQLInjectionException();
-		}
-	}
+    private void validateReportName(final String name) {
+
+        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
+            throw new SQLInjectionException();
+        }
+    }
 }

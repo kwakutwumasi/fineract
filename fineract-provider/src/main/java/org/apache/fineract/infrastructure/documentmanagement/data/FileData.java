@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +61,7 @@ public class FileData {
             if (this.inputStream == null) { return new FileInputStream(this.file); }
             return this.inputStream;
         } catch (final FileNotFoundException e) {
-            logger.error(e.toString());
+            logger.error("Error occured.", e);
             return null;
         }
     }

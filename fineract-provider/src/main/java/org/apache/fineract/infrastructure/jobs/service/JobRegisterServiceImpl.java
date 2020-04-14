@@ -18,21 +18,23 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronMethodParser;
 import org.apache.fineract.infrastructure.jobs.annotation.CronMethodParser.ClassMethodNamesPair;
+import org.apache.fineract.infrastructure.jobs.domain.JobParameter;
+import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
@@ -78,6 +80,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private SchedulerJobListener schedulerJobListener;
     private SchedulerStopListener schedulerStopListener;
     private SchedulerTriggerListener globalSchedulerTriggerListener;
+    private JobParameterRepository jobParameterRepository;
 
     private final HashMap<String, Scheduler> schedulers = new HashMap<>(4);
 
@@ -109,6 +112,11 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Autowired
     public void setGlobalTriggerListener(SchedulerTriggerListener globalTriggerListener) {
         this.globalSchedulerTriggerListener = globalTriggerListener;
+    }
+
+    @Autowired
+    public  void setJobParameterRepository(JobParameterRepository jobParameterRepository){
+        this.jobParameterRepository=jobParameterRepository;
     }
 
     @PostConstruct
@@ -156,7 +164,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
         } catch (final Exception e) {
             final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
-            logger.error(msg, e);
+            logger.error("{}", msg, e);
             throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId());
         }
 
@@ -215,7 +223,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                                     }
                                 }
                             } catch (final SchedulerException e) {
-                                logger.error(e.getMessage(), e);
+                                logger.error("Error occured.", e);
                             }
                         }
                         jobDetail.updateTriggerMisfired(false);
@@ -273,7 +281,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             scheduledJobDetails.updateNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.updateErrorLog(stackTrace);
-            logger.error("Could not schedule job: " + scheduledJobDetails.getJobName(), throwable);
+            logger.error("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
     }
@@ -284,7 +292,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             try {
                 scheduler.shutdown();
             } catch (final SchedulerException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("Error occured.", e);
             }
         }
     }
@@ -309,7 +317,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         try {
             scheduler.shutdown();
         } catch (final SchedulerException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Error occured.", e);
         }
     }
 
@@ -354,6 +362,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         return jobDetailFactoryBean.getObject();
     }
 
+    public Map<String,String> getJobParameter(ScheduledJobDetail scheduledJobDetail){
+        List<JobParameter> jobParameterList= jobParameterRepository.findJobParametersByJobId(scheduledJobDetail.getId());
+        Map<String,String> jobParameterMap=new HashMap<>();
+        for (JobParameter jobparameter:jobParameterList) {
+            jobParameterMap.put(jobparameter.getParameterName(),jobparameter.getParameterValue());
+        }
+        return  jobParameterMap;
+    }
     private Object getBeanObject(final Class<?> classType) throws ClassNotFoundException {
         final List<Class<?>> typesList = new ArrayList<>();
         final Class<?>[] interfaceType = classType.getInterfaces();
@@ -402,7 +418,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private String getStackTraceAsString(final Throwable throwable) {
         final StackTraceElement[] stackTraceElements = throwable.getStackTrace();
-        final StringBuffer sb = new StringBuffer(throwable.toString());
+        final StringBuilder sb = new StringBuilder(throwable.toString());
         for (final StackTraceElement element : stackTraceElements) {
             sb.append("\n \t at ").append(element.getClassName()).append(".").append(element.getMethodName()).append("(")
                     .append(element.getLineNumber()).append(")");

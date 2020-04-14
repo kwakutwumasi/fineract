@@ -20,20 +20,18 @@ package org.apache.fineract.portfolio.interestratechart.domain;
 
 import java.util.Locale;
 import java.util.Map;
-
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_interest_incentives")
-public class InterestIncentives extends AbstractPersistableCustom<Long> {
+public class InterestIncentives extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "interest_rate_slab_id", nullable = false)

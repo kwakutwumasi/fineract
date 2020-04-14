@@ -20,18 +20,16 @@ package org.apache.fineract.organisation.provisioning.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_provision_category", uniqueConstraints = { @UniqueConstraint(columnNames = { "category_name" }, name = "category_name") })
-public class ProvisioningCategory extends AbstractPersistableCustom<Long> {
+public class ProvisioningCategory extends AbstractPersistableCustom {
 
     @Column(name = "category_name", nullable = false, unique = true)
     private String categoryName;

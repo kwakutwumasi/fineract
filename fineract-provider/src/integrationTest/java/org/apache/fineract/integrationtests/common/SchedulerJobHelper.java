@@ -18,15 +18,13 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import com.google.gson.Gson;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.junit.Assert;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class SchedulerJobHelper {

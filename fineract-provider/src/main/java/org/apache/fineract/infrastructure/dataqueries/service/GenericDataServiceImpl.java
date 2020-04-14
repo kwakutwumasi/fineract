@@ -20,9 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -57,40 +55,40 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     @Override
     public GenericResultsetData fillGenericResultSet(final String sql) {
-    	try{
-    		 final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        try{
+             final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-    	        final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
-    	        final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
+                final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
+                final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
 
-    	        final SqlRowSetMetaData rsmd = rs.getMetaData();
+                final SqlRowSetMetaData rsmd = rs.getMetaData();
 
-    	        for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                for (int i = 0; i < rsmd.getColumnCount(); i++) {
 
-    	            final String columnName = rsmd.getColumnName(i + 1);
-    	            final String columnType = rsmd.getColumnTypeName(i + 1);
+                    final String columnName = rsmd.getColumnName(i + 1);
+                    final String columnType = rsmd.getColumnTypeName(i + 1);
 
-    	            final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType);
-    	            columnHeaders.add(columnHeader);
-    	        }
+                    final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType);
+                    columnHeaders.add(columnHeader);
+                }
 
-    	        while (rs.next()) {
-    	            final List<String> columnValues = new ArrayList<>();
-    	            for (int i = 0; i < rsmd.getColumnCount(); i++) {
-    	                final String columnName = rsmd.getColumnName(i + 1);
-    	                final String columnValue = rs.getString(columnName);
-    	                columnValues.add(columnValue);
-    	            }
+                while (rs.next()) {
+                    final List<String> columnValues = new ArrayList<>();
+                    for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                        final String columnName = rsmd.getColumnName(i + 1);
+                        final String columnValue = rs.getString(columnName);
+                        columnValues.add(columnValue);
+                    }
 
-    	            final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
-    	            resultsetDataRows.add(resultsetDataRow);
-    	        }
+                    final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
+                    resultsetDataRows.add(resultsetDataRow);
+                }
 
-			return new GenericResultsetData(columnHeaders, resultsetDataRows);
-		} catch (DataAccessException e) {
-			throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue", e.getClass().getName());
-		}
-	}
+            return new GenericResultsetData(columnHeaders, resultsetDataRows);
+        } catch (DataAccessException e) {
+            throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue", e.getClass().getName());
+        }
+    }
 
     @Override
     public String replace(final String str, final String pattern, final String replace) {
@@ -99,7 +97,7 @@ public class GenericDataServiceImpl implements GenericDataService {
         // apache one to be about the same then this can be removed.
         int s = 0;
         int e = 0;
-        final StringBuffer result = new StringBuffer();
+        final StringBuilder result = new StringBuilder();
 
         while ((e = str.indexOf(pattern, s)) >= 0) {
             result.append(str.substring(s, e));
@@ -124,7 +122,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     @Override
     public String generateJsonFromGenericResultsetData(final GenericResultsetData grs) {
 
-        final StringBuffer writer = new StringBuffer();
+        final StringBuilder writer = new StringBuilder();
 
         writer.append("[");
 

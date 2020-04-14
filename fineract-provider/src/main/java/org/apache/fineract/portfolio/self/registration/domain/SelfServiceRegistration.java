@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.self.registration.domain;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -27,13 +26,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "request_audit_table")
-public class SelfServiceRegistration extends AbstractPersistableCustom<Long> {
+public class SelfServiceRegistration extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)

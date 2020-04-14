@@ -24,7 +24,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -33,7 +32,7 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 @Entity
 @Table(name = "acc_product_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "product_id", "product_type",
         "financial_account_type", "payment_type" }, name = "financial_action") })
-public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
+public class ProductToGLAccountMapping extends AbstractPersistableCustom {
 
     @ManyToOne(optional=true)
     @JoinColumn(name = "gl_account_id")

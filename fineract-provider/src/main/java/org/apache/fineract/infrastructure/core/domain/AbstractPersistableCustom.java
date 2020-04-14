@@ -19,52 +19,45 @@
 package org.apache.fineract.infrastructure.core.domain;
 
 import java.io.Serializable;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-
+import javax.persistence.Transient;
 import org.springframework.data.domain.Persistable;
 
-
+/**
+ * Abstract base class for entities.
+ *
+ * Inspired by {@link org.springframework.data.jpa.domain.AbstractPersistable}, but
+ * Id is always Long (and this class thus does not require generic parameterization),
+ * and auto-generation is of strategy {@link javax.persistence.GenerationType#IDENTITY}.
+ *
+ * The {@link #equals(Object)} and {@link #hashCode()} methods are NOT implemented here,
+ * which is untypical for JPA (it's usually implemented based on the Id), because
+ * "we end up with issues on OpenJPA" (TODO clarify this).
+ */
 @MappedSuperclass
-public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long> {
+public abstract class AbstractPersistableCustom implements Persistable<Long>, Serializable {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+    private static final long serialVersionUID = 9181640245194392646L;
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.springframework.data.domain.Persistable#getId()
-         */
-        @Override
-        public Long getId() {
-                return id;
-        }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        /**
-         * Sets the id of the entity.
-         * 
-         * @param id the id to set
-         */
-        protected void setId(final Long id) {
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-                this.id = id;
-        }
+    protected void setId(final Long id) {
+        this.id = id;
+    }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.springframework.data.domain.Persistable#isNew()
-         */
-        @Override
-        public boolean isNew() {
-
-                return null == this.id;
-        }
-
-        //We have removed toString(), hashCode() and equals() methods. By adding them end up issues with OpenJPA
+    @Override
+    @Transient // DATAJPA-622
+    public boolean isNew() {
+        return null == this.id;
+    }
 }

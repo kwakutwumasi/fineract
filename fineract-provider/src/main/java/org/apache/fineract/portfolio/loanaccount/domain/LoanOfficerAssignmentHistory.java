@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -27,16 +26,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.staff.domain.Staff;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_officer_assignment_history")
-public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUser, Long> {
+public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
@@ -99,7 +96,7 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
 
     /**
      * If endDate is null then return false.
-     * 
+     *
      * @param compareDate
      * @return
      */

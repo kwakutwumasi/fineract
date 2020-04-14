@@ -20,17 +20,14 @@ package org.apache.fineract.integrationtests.common.savings;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.gson.Gson;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings("unused")
 public class SavingsProductHelper {
@@ -78,7 +75,7 @@ public class SavingsProductHelper {
     private String lockinPeriodFrequency = "0";
     private String withdrawalFeeForTransfers = "true";
     private String lockingPeriodFrequencyType = DAYS;
-    private final String currencyCode = USD;
+    private String currencyCode = USD;
     private final String interestCalculationDaysInYearType = DAYS_365;
     private Account[] accountList = null;
     private String minBalanceForInterestCalculation = null;
@@ -135,10 +132,10 @@ public class SavingsProductHelper {
             map.putAll(getAccountMappingForCashBased());
         }
         if(this.isDormancyTrackingActive){
-        	map.put("isDormancyTrackingActive", Boolean.toString(this.isDormancyTrackingActive));
-        	map.put("daysToInactive", this.daysToInactive);
-        	map.put("daysToDormancy", this.daysToDormancy);
-        	map.put("daysToEscheat", this.daysToEscheat);
+            map.put("isDormancyTrackingActive", Boolean.toString(this.isDormancyTrackingActive));
+            map.put("daysToInactive", this.daysToInactive);
+            map.put("daysToDormancy", this.daysToDormancy);
+            map.put("daysToEscheat", this.daysToEscheat);
 
         }
         String savingsProductCreateJson = new Gson().toJson(map);
@@ -231,6 +228,16 @@ public class SavingsProductHelper {
         return this;
     }
 
+    public SavingsProductHelper withCurrencyCode(String currency) {
+        this.currencyCode = currency;
+        return this;
+    }
+
+    public SavingsProductHelper withNominalAnnualInterestRate(BigDecimal interestRate) {
+        this.nominalAnnualInterestRate = interestRate.toString();
+        return this;
+    }
+
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -274,13 +281,13 @@ public class SavingsProductHelper {
         assertEquals("ERROR IN CREATING THE Savings Product", generatedProductID, responseSavingsProductID);
     }
 
-	public SavingsProductHelper withDormancy() {
-	    this.isDormancyTrackingActive = true;
-	    this.daysToInactive = "30";
-	    this.daysToDormancy = "60";
-	    this.daysToEscheat = "90";
+    public SavingsProductHelper withDormancy() {
+        this.isDormancyTrackingActive = true;
+        this.daysToInactive = "30";
+        this.daysToDormancy = "60";
+        this.daysToEscheat = "90";
 
-		return this;
-	}
+        return this;
+    }
 
 }

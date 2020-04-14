@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.spm.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.spm.data.LookupTableData;
 import org.apache.fineract.spm.data.LookupTableEntry;
 import org.apache.fineract.spm.domain.LookupTable;
 import org.apache.fineract.spm.domain.Survey;
-
-import java.util.*;
 
 public class LookupTableMapper {
 
@@ -50,7 +53,7 @@ public class LookupTableMapper {
             return new ArrayList<>(lookupTableDataMap.values());
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public static List<LookupTable> map(final LookupTableData lookupTableData, final Survey survey) {

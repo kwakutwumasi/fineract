@@ -19,18 +19,16 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_savings_account_charge_paid_by")
-public class SavingsAccountChargePaidBy extends AbstractPersistableCustom<Long> {
+public class SavingsAccountChargePaidBy extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "savings_account_transaction_id", nullable = false)

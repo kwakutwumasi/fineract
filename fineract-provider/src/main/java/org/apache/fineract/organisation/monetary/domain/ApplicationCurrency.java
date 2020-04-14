@@ -21,14 +21,13 @@ package org.apache.fineract.organisation.monetary.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_currency")
-public class ApplicationCurrency extends AbstractPersistableCustom<Long> {
+public class ApplicationCurrency extends AbstractPersistableCustom {
 
     @Column(name = "code", nullable = false, length = 3)
     private String code;

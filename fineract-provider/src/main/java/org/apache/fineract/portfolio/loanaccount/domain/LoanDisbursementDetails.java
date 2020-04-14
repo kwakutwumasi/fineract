@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -28,14 +28,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_disbursement_detail")
-public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
+public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
@@ -70,9 +69,14 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
     public boolean equals(final Object obj) {
         final LoanDisbursementDetails loanDisbursementDetails = (LoanDisbursementDetails) obj;
         if (loanDisbursementDetails.principal.equals(this.principal)
-                && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate)) 
+                && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate))
         { return true; }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expectedDisbursementDate, principal);
     }
 
     public void copy(final LoanDisbursementDetails disbursementDetails) {

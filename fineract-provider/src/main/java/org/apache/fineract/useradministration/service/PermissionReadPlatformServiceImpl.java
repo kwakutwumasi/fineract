@@ -21,7 +21,6 @@ package org.apache.fineract.useradministration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.data.PermissionData;
@@ -35,7 +34,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PermissionReadPlatformServiceImpl implements PermissionReadPlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(PermissionReadPlatformService.class);
+    private final static Logger logger = LoggerFactory.getLogger(PermissionReadPlatformServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
@@ -53,7 +52,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper();
         final String sql = mapper.permissionSchema();
-        logger.info("retrieveAllPermissions: " + sql);
+        logger.info("retrieveAllPermissions: {}", sql);
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
@@ -64,7 +63,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper();
         final String sql = mapper.makerCheckerablePermissionSchema();
-        logger.info("retrieveAllMakerCheckerablePermissions: " + sql);
+        logger.info("retrieveAllMakerCheckerablePermissions: {}", sql);
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
@@ -74,7 +73,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper();
         final String sql = mapper.rolePermissionSchema();
-        logger.info("retrieveAllRolePermissions: " + sql);
+        logger.info("retrieveAllRolePermissions: {}", sql);
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { roleId });
     }

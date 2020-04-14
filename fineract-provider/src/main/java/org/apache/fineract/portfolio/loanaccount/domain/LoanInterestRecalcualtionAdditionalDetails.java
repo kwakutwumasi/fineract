@@ -20,19 +20,17 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_interest_recalculation_additional_details")
-public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersistableCustom<Long> {
+public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersistableCustom {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "effective_date")
