@@ -94,8 +94,9 @@ public class CashierTransactionDataValidator {
 		 */
 		if (fromDate.isBefore(tellerFromDate)
 				|| endDate.isBefore(tellerFromDate)
-				|| (tellerEndDate != null && (fromDate.isAfter(tellerEndDate) || endDate
-						.isAfter(tellerEndDate)))) {
+				|| (tellerEndDate != null &&
+	            (fromDate.isAfter(tellerEndDate)
+	              || endDate.isAfter(tellerEndDate)))) {
 			throw new CashierDateRangeOutOfTellerDateRangeException();
 		}
 		/**
