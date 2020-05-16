@@ -440,7 +440,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         final ActionNamesMapper mapper = new ActionNamesMapper();
         final List<String> actionNames = this.jdbcTemplate.query(sql, mapper);
 
-        sql = " select distinct(entity_name) as entityName from m_permission p ";
+        sql = " select distinct entity_name as entityName, grouping from m_permission p ";
         sql += makercheckerCapabilityOnly(useType, currentUser);
         sql += " order by if(grouping = 'datatable', 'ZZZ', entity_name), entity_name";
         final EntityNamesMapper mapper2 = new EntityNamesMapper();
