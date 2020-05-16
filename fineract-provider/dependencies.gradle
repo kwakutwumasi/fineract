@@ -31,7 +31,6 @@ dependencies {
 
     api(
             'com.google.code.gson:gson',
-            'org.quartz-scheduler:quartz',
             'org.apache.openjpa:openjpa',
             'org.springframework:spring-jms',
             'joda-time:joda-time',
@@ -42,6 +41,11 @@ dependencies {
             'com.sun.jersey:jersey-core',
             'com.squareup.retrofit:retrofit'
     )
+     
+    api('org.quartz-scheduler:quartz'){
+    	exclude group: 'com.zaxxer', module: 'HikariCP-java7'
+    }
+    
     implementation(
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
