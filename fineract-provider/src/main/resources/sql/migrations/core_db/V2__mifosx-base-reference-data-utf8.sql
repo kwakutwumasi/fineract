@@ -153,7 +153,7 @@ VALUES
 (48,'FKP',2,NULL,'Falkland Islands Pound','currency.FKP'),
 (49,'GBP',2,NULL,'Pound Sterling','currency.GBP'),
 (50,'GEL',2,NULL,'Georgian Lari','currency.GEL'),
-(51,'GHC',2,'GHc','Ghana Cedi','currency.GHC'),
+(51,'GHS',2,'GHS','Ghana Cedi','currency.GHS'),
 (52,'GIP',2,NULL,'Gibraltar Pound','currency.GIP'),
 (53,'GMD',2,NULL,'Gambian Dalasi','currency.GMD'),
 (54,'GNF',0,NULL,'Guinea Franc','currency.GNF'),
