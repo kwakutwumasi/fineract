@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 
@@ -40,13 +41,14 @@ public class LoanAccountSummaryData {
     private final Integer loanCycle;
     private final LoanApplicationTimelineData timeline;
     private final Boolean inArrears;
+    private final CurrencyData currency;
     private final BigDecimal originalLoan;
     private final BigDecimal loanBalance;
     private final BigDecimal amountPaid;
 
     public LoanAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle,
-            final LoanApplicationTimelineData timeline, final Boolean inArrears,final BigDecimal originalLoan,final BigDecimal loanBalance,final BigDecimal amountPaid) {
+            final LoanApplicationTimelineData timeline, final Boolean inArrears,final BigDecimal originalLoan,final BigDecimal loanBalance,final BigDecimal amountPaid, CurrencyData currency) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -61,5 +63,6 @@ public class LoanAccountSummaryData {
         this.loanBalance = loanBalance;
         this.originalLoan = originalLoan;
         this.amountPaid = amountPaid;
+        this.currency = currency;
     }
 }
