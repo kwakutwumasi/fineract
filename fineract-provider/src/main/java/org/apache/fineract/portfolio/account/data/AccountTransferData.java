@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.joda.time.LocalDate;
 
 /**
@@ -47,6 +48,7 @@ public class AccountTransferData implements Serializable {
     private final ClientData toClient;
     private final EnumOptionData toAccountType;
     private final PortfolioAccountData toAccount;
+    private final PaymentDetailData paymentDetailData;
 
     // template
     private final Collection<OfficeData> fromOfficeOptions;
@@ -77,18 +79,18 @@ public class AccountTransferData implements Serializable {
         final String transferDescription = null;
         final Boolean reversed = null;
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
-                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, fromOfficeOptions, fromClientOptions,
+                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, null, fromOfficeOptions, fromClientOptions,
                 fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
     }
 
     public static AccountTransferData instance(final Long id, final Boolean reversed, final LocalDate transferDate,
             final CurrencyData currency, final BigDecimal transferAmount, final String transferDescription, final OfficeData fromOffice,
             final OfficeData toOffice, final ClientData fromClient, final ClientData toClient, final EnumOptionData fromAccountType,
-            final PortfolioAccountData fromAccount, final EnumOptionData toAccountType, final PortfolioAccountData toAccount) {
+            final PortfolioAccountData fromAccount, final EnumOptionData toAccountType, final PortfolioAccountData toAccount, PaymentDetailData paymentDetailData) {
 
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
-                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, null, null, null, null, null, null, null,
-                null);
+                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, paymentDetailData, null, null, null, null, null, null,
+                null, null);
     }
 
     public static AccountTransferData transferBasicDetails(final Long id, final CurrencyData currency, final BigDecimal transferAmount,
@@ -98,17 +100,17 @@ public class AccountTransferData implements Serializable {
         final EnumOptionData toAccountType = null;
 
         return new AccountTransferData(id, reversed, null, null, fromAccountType, null, currency, transferAmount, transferDate,
-                description, null, null, toAccountType, null, null, null, null, null, null, null, null, null);
+                description, null, null, toAccountType, null, null, null, null, null, null, null, null, null, null);
     }
 
     private AccountTransferData(final Long id, final Boolean reversed, final OfficeData fromOffice, final ClientData fromClient,
             final EnumOptionData fromAccountType, final PortfolioAccountData fromAccount, final CurrencyData currency,
             final BigDecimal transferAmount, final LocalDate transferDate, final String transferDescription, final OfficeData toOffice,
             final ClientData toClient, final EnumOptionData toAccountType, final PortfolioAccountData toAccount,
-            final Collection<OfficeData> fromOfficeOptions, final Collection<ClientData> fromClientOptions,
-            final Collection<EnumOptionData> fromAccountTypeOptions, final Collection<PortfolioAccountData> fromAccountOptions,
-            final Collection<OfficeData> toOfficeOptions, final Collection<ClientData> toClientOptions,
-            final Collection<EnumOptionData> toAccountTypeOptions, final Collection<PortfolioAccountData> toAccountOptions) {
+            PaymentDetailData paymentDetailData, final Collection<OfficeData> fromOfficeOptions,
+            final Collection<ClientData> fromClientOptions, final Collection<EnumOptionData> fromAccountTypeOptions,
+            final Collection<PortfolioAccountData> fromAccountOptions, final Collection<OfficeData> toOfficeOptions,
+            final Collection<ClientData> toClientOptions, final Collection<EnumOptionData> toAccountTypeOptions, final Collection<PortfolioAccountData> toAccountOptions) {
         this.id = id;
         this.reversed = reversed;
         this.fromOffice = fromOffice;
@@ -133,5 +135,6 @@ public class AccountTransferData implements Serializable {
         this.toClientOptions = toClientOptions;
         this.toAccountTypeOptions = toAccountTypeOptions;
         this.toAccountOptions = toAccountOptions;
+        this.paymentDetailData = paymentDetailData;
     }
 }
