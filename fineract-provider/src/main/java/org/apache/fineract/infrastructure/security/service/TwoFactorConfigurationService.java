@@ -47,4 +47,9 @@ public interface TwoFactorConfigurationService {
     Integer getAccessTokenExtendedLiveTime();
 
     Map<String,Object> update(JsonCommand command);
+
+	String getTOTPServerURL();
+	Integer getTOTPAuthenticationIDLength();
+
+	boolean isTOTPEnabled();
 }

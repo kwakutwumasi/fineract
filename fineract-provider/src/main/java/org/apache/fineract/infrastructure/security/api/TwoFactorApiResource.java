@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.security.data.OTPMetadata;
 import org.apache.fineract.infrastructure.security.data.OTPRequest;
 import org.apache.fineract.infrastructure.security.domain.TFAccessToken;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.TOTPServerTokenAuthenticationService;
 import org.apache.fineract.infrastructure.security.service.TwoFactorService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +64,7 @@ public class TwoFactorApiResource {
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final TwoFactorService twoFactorService;
-
-
+    private final TOTPServerTokenAuthenticationService totpServerTokenAuthenticationService;
 
     @Autowired
     public TwoFactorApiResource(ToApiJsonSerializer<OTPMetadata> otpRequestSerializer,
@@ -74,7 +74,8 @@ public class TwoFactorApiResource {
                                 PlatformSecurityContext context,
                                 PortfolioCommandSourceWritePlatformService
                                             commandsSourceWritePlatformService,
-                                TwoFactorService twoFactorService) {
+                                TwoFactorService twoFactorService,
+                                TOTPServerTokenAuthenticationService totpServerTokenAuthenticationService) {
         this.otpRequestSerializer = otpRequestSerializer;
         this.otpDeliveryMethodSerializer = otpDeliveryMethodSerializer;
         this.accessTokenSerializer = accessTokenSerializer;
@@ -82,6 +83,7 @@ public class TwoFactorApiResource {
         this.context = context;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.twoFactorService = twoFactorService;
+        this.totpServerTokenAuthenticationService = totpServerTokenAuthenticationService;
     }
 
 
@@ -108,10 +110,10 @@ public class TwoFactorApiResource {
     @Path("validate")
     @POST
     @Produces({ MediaType.APPLICATION_JSON })
-    public String validate(@QueryParam("token") final String token) {
+    public String validate(@QueryParam("token") final String token, @QueryParam("type") String type) {
         final AppUser user = context.authenticatedUser();
 
-        TFAccessToken accessToken = twoFactorService.createAccessTokenFromOTP(user, token);
+        TFAccessToken accessToken = twoFactorService.createAccessTokenFromOTP(user, token, type);
 
         return accessTokenSerializer.serialize(accessToken.toTokenData());
     }
@@ -126,5 +128,13 @@ public class TwoFactorApiResource {
                 logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
+    }
+    
+    @Path("direct-authentication-id")
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String generateDirectAuthenticationId(@QueryParam("username") String username, 
+    		@QueryParam("application-name") String applicationName) {
+    	return totpServerTokenAuthenticationService.generateAuthenticationID(username, applicationName);
     }
 }

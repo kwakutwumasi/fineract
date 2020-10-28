@@ -31,7 +31,7 @@ public interface TwoFactorService {
 
     OTPRequest createNewOTPToken(AppUser user, String deliveryMethodName, boolean extendedAccessToken);
 
-    TFAccessToken createAccessTokenFromOTP(AppUser user, String otpToken);
+    TFAccessToken createAccessTokenFromOTP(AppUser user, String otpToken, String type);
 
     void validateTwoFactorAccessToken(AppUser user, String token);
 

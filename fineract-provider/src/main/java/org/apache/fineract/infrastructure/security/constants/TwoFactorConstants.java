@@ -27,4 +27,11 @@ public class TwoFactorConstants {
 
     public static final String BYPASS_TWO_FACTOR_PERMISSION = "BYPASS_TWOFACTOR";
 
+    public static final String TOTPAPP_DIRECT_METHOD_NAME = "direct";
+    public static final String TOTPAPP_TOKEN_METHOD_NAME = "totptoken";
+	public static final String TOTP_DEVICE_ID = "deviceId";
+	public static final String TOTP_OTP = "otp";
+	public static final String TOTP_APPLICATION_NAME = "Application Name";
+	public static final String TOTP_AUTHENTIATION_ID = "Authentication ID";
+	public static final String TOTP_DEFAULT_APPLICATION_NAME = "Fineract API Server";
 }

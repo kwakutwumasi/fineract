@@ -41,6 +41,10 @@ public class TwoFactorConfigurationConstants {
 
     public static final String ACCESS_TOKEN_LIVE_TIME = "access-token-live-time";
     public static final String ACCESS_TOKEN_LIVE_TIME_EXTENDED = "access-token-live-time-extended";
+    
+    public static final String TOTP_SERVER_URL = "totp-server-url";
+    public static final String TOTP_AUTHENTICATION_ID_LENGTH = "totp-authentication-id-length";
+	public static final String ENABLE_TOTP_SERVER = "totp-server-enable";
 
     public static final Set<String> REQUEST_DATA_PARAMETERS =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENABLE_EMAIL_DELIVERY, EMAIL_SUBJECT, EMAIL_BODY,
@@ -48,13 +52,15 @@ public class TwoFactorConfigurationConstants {
                     OTP_TOKEN_LENGTH, ACCESS_TOKEN_LIVE_TIME, ACCESS_TOKEN_LIVE_TIME_EXTENDED)));
 
     public static final List<String> STRING_PARAMETERS =
-            Collections.unmodifiableList(Arrays.asList(EMAIL_SUBJECT, EMAIL_BODY, SMS_MESSAGE_TEXT));
+            Collections.unmodifiableList(Arrays.asList(EMAIL_SUBJECT, EMAIL_BODY, SMS_MESSAGE_TEXT, TOTP_SERVER_URL,
+            		TOTP_AUTHENTICATION_ID_LENGTH));
 
     public static final List<String> BOOLEAN_PARAMETERS =
-            Collections.unmodifiableList(Arrays.asList(ENABLE_EMAIL_DELIVERY, ENABLE_SMS_DELIVERY));
+            Collections.unmodifiableList(Arrays.asList(ENABLE_EMAIL_DELIVERY, ENABLE_SMS_DELIVERY, ENABLE_TOTP_SERVER));
 
     public static final List<String> NUMBER_PARAMETERS =
             Collections.unmodifiableList(Arrays.asList(SMS_PROVIDER_ID, OTP_TOKEN_LIVE_TIME, OTP_TOKEN_LENGTH,
                     ACCESS_TOKEN_LIVE_TIME, ACCESS_TOKEN_LIVE_TIME_EXTENDED));
+
 
 }

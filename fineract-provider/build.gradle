@@ -413,17 +413,17 @@ task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License)
 licenseFormat.dependsOn licenseFormatBuildScripts
 
 tomcatRun {
-    httpPort = 8080
+    httpPort = 8085
     httpsPort = 8443
-    stopPort = 8081
+    stopPort = 8086
     stopKey=   'stopKey'
     enableSSL = true
 }
 
 tomcatRunWar {
-    httpPort = 8080
+    httpPort = 8085
     httpsPort = 8443
-    stopPort = 8081
+    stopPort = 8086
     stopKey=   'stopKey'
     enableSSL = true
     keystoreFile = file('src/main/resources/keystore.jks')

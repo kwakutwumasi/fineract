@@ -230,6 +230,29 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
         return value;
     }
 
+    @Override
+    @Cacheable(value = "tfConfig", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()+'|totpServerURL'")
+    public String getTOTPServerURL() {
+    	return getStringConfig(TwoFactorConfigurationConstants.TOTP_SERVER_URL, "http://localhost:8080");
+    }
+
+    @Override
+    @Cacheable(value = "tfConfig", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()+'|totpAuthenticationIdLength'")
+    public Integer getTOTPAuthenticationIDLength() {
+    	 Integer defaultValue = 6;
+         Integer value = getIntegerConfig(TwoFactorConfigurationConstants.TOTP_AUTHENTICATION_ID_LENGTH, defaultValue);
+         if(value < 6) {
+        	 value = defaultValue;
+         }
+         return value;
+    }
+        
+    @Override
+    @Cacheable(value = "tfConfig", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()+'|totpEnabled'")
+    public boolean isTOTPEnabled() {
+        return getBooleanConfig(TwoFactorConfigurationConstants.ENABLE_TOTP_SERVER, false);
+    }
+
     private boolean getBooleanConfig(final String name, final boolean defaultValue) {
         final TwoFactorConfiguration configuration =
                 configurationRepository.findByName(name);
