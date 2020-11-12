@@ -20,6 +20,14 @@ package org.apache.fineract.portfolio.account.data;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.bankNumberParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.checkNumberParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.paymentTypeIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.receiptNumberParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.routingCodeParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionAccountNumberParamName;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -100,6 +108,17 @@ public class AccountTransfersDataValidator {
                 (transactionDescription).notBlank()
                 .notExceedingLengthOf(200);
 
+     // Validate all string payment detail fields for max length
+        final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
+        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
+        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
+                routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+        for (final String paymentDetailParameterName : paymentDetailParameters) {
+            final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
+                    .notExceedingLengthOf(500);
+        }
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

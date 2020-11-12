@@ -24,11 +24,11 @@ New table for storing transaction details (for both loan and savings)
 CREATE TABLE `m_payment_detail` (
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
 	`payment_type_enum` SMALLINT(5) NOT NULL,
-	`account_number` VARCHAR(100) NULL DEFAULT NULL,
-	`check_number` VARCHAR(100) NULL DEFAULT NULL,
-	`receipt_number` VARCHAR(100) NULL DEFAULT NULL,
-	`bank_number` VARCHAR(100) NULL DEFAULT NULL,
-	`routing_code` VARCHAR(100) NULL DEFAULT NULL,
+	`account_number` VARCHAR(500) NULL DEFAULT NULL,
+	`check_number` VARCHAR(500) NULL DEFAULT NULL,
+	`receipt_number` VARCHAR(500) NULL DEFAULT NULL,
+	`bank_number` VARCHAR(500) NULL DEFAULT NULL,
+	`routing_code` VARCHAR(500) NULL DEFAULT NULL,
 	PRIMARY KEY (`id`)
 )
 COLLATE='utf8_general_ci'

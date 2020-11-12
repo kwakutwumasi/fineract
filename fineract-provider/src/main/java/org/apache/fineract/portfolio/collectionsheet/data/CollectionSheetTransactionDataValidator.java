@@ -271,7 +271,7 @@ public class CollectionSheetTransactionDataValidator {
         for (final String paymentDetailParameterName : PAYMENT_CREATE_REQUEST_DATA_PARAMETERS) {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
             baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
-                    .notExceedingLengthOf(50);
+                    .notExceedingLengthOf(500);
         }
     }
 
