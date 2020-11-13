@@ -42,12 +42,13 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
     public void sendToUserAccount(String organisationName, String contactName,
                                   String address, String username, String unencodedPassword) {
 
-	    final String subject = "Welcome " + contactName + " to " + organisationName;
-        final StringBuilder body = new StringBuilder().append("You are receiving this email as your email account: ")
-                .append(address).append(" has being used to create a user account for an organisation named [")
-                .append(organisationName).append("] on MifosX Prototype Demo.")
-                .append("You can login using the following credentials: username: ").append(username)
-                .append(" password: ").append(unencodedPassword);
+	    final String subject = "Welcome " + contactName;
+        final StringBuilder body = new StringBuilder().append("Hello ").append(contactName).append(",\nYour email account: ")
+                .append(address).append(" has been used to create a user account for you under the Organisation Unit ")
+                .append(organisationName).append(" on ").append(externalServicesReadPlatformService.getSMTPCredentials().getApplicationURL()).append(".")
+                .append("You may login using the following credentials:\n\nusername: ").append(username)
+                .append(" password: ").append(unencodedPassword)
+                .append("\nIf you have any questions concerning the usage of this application, please contact your System Administrator.");
 
 	    final EmailDetail emailDetail = new EmailDetail(subject, body.toString(), address, contactName);
 	    sendDefinedEmail(emailDetail);

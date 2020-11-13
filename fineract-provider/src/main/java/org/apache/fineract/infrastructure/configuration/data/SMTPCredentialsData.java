@@ -27,8 +27,9 @@ public class SMTPCredentialsData {
     private final boolean useTLS;
     private final String fromEmail;
     private final String fromName;
+    private final String applicationURL;
 
-    public SMTPCredentialsData(final String username, final String password, final String host, final String port, final boolean useTLS, String fromEmail, String fromName) {
+    public SMTPCredentialsData(final String username, final String password, final String host, final String port, final boolean useTLS, String fromEmail, String fromName, String applicationURL) {
         this.username = username;
         this.password = password;
         this.host = host;
@@ -36,6 +37,7 @@ public class SMTPCredentialsData {
         this.useTLS = useTLS;
         this.fromEmail = fromEmail;
         this.fromName = fromName;
+        this.applicationURL = applicationURL;
     }
 
     public String getUsername() {
@@ -65,4 +67,8 @@ public class SMTPCredentialsData {
     public String getFromName() {
         return fromName != null ?fromName :username;
     }
+    
+    public String getApplicationURL() {
+		return applicationURL;
+	}
 }

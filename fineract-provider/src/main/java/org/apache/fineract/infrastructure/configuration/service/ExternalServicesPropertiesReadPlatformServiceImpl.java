@@ -76,7 +76,8 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
             boolean useTLS = false;
             String fromEmail = null;
             String fromName = null;
-
+            String applicationURL = null;
+            
             while (rs.next()) {
                 String name = rs.getString("name");
                 String value = rs.getString("value");
@@ -95,9 +96,11 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
                     fromEmail = value;
                 } else if (ExternalServicesConstants.SMTP_FROM_NAME.equalsIgnoreCase(name)) {
                     fromName = value;
+                } else if(ExternalServicesConstants.SMTP_APPLICATION_URL.equalsIgnoreCase(name)) {
+                	applicationURL = value;
                 }
             }
-            return new SMTPCredentialsData(username, password, host, port, useTLS, fromEmail, fromName);
+            return new SMTPCredentialsData(username, password, host, port, useTLS, fromEmail, fromName, applicationURL);
         }
     }
 

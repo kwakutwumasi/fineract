@@ -36,6 +36,7 @@ public class ExternalServicesConstants {
     public static final String SMTP_USE_TLS = "useTLS";
     public static final String SMTP_FROM_EMAIL = "fromEmail";
     public static final String SMTP_FROM_NAME = "fromName";
+	public static final String SMTP_APPLICATION_URL = "smtp_application_url";
 
     public static final String SMS_SERVICE_NAME = "MESSAGE_GATEWAY";
     public static final String SMS_HOST = "host_name";
