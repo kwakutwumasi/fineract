@@ -45,10 +45,10 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
 	    final String subject = "Welcome " + contactName;
         final StringBuilder body = new StringBuilder().append("Hello ").append(contactName).append(",\nYour email account: ")
                 .append(address).append(" has been used to create a user account for you under the Organisation Unit ")
-                .append(organisationName).append(" on ").append(externalServicesReadPlatformService.getSMTPCredentials().getApplicationURL()).append(".")
-                .append("You may login using the following credentials:\n\nusername: ").append(username)
-                .append(" password: ").append(unencodedPassword)
-                .append("\nIf you have any questions concerning the usage of this application, please contact your System Administrator.");
+                .append(organisationName).append(" on ").append(externalServicesReadPlatformService.getSMTPCredentials().getApplicationURL())
+                .append(".\nYou may login using the following credentials:\n\nusername: ").append(username)
+                .append("\npassword: ").append(unencodedPassword)
+                .append("\n\nIf you have any questions concerning the usage of this application, please contact your System Administrator.");
 
 	    final EmailDetail emailDetail = new EmailDetail(subject, body.toString(), address, contactName);
 	    sendDefinedEmail(emailDetail);
