@@ -84,7 +84,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataService {
 
-    private final static String DATATABLE_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
+    private final static String NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9_]{0,48}[a-zA-Z0-9]$";
 
     private final static String CODE_VALUES_TABLE = "m_code_value";
 
@@ -490,8 +490,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         if (name == null || name.isEmpty()) {
             throw new PlatformDataIntegrityException("error.msg.datatables.datatable.null.name", "Data table name must not be blank.");
-        } else if (!name.matches(DATATABLE_NAME_REGEX_PATTERN)) { throw new PlatformDataIntegrityException(
+        } else if (!name.matches(NAME_REGEX_PATTERN)) { throw new PlatformDataIntegrityException(
                 "error.msg.datatables.datatable.invalid.name.regex", "Invalid data table name.", name); }
+        SQLInjectionValidator.validateSQLInput(name);
+    }
+    
+    private void validateColumnName(final String name) {
+    	
+        if (name == null || name.isEmpty()) {
+            throw new PlatformDataIntegrityException("error.msg.datatables.datatable.column.null.name", "Datatable column name must not be blank.");
+        } else if (!name.matches(NAME_REGEX_PATTERN)) { throw new PlatformDataIntegrityException(
+                "error.msg.datatables.datatable.column.invalid.name.regex", "Invalid Datable column name.", name); }
         SQLInjectionValidator.validateSQLInput(name);
     }
 
@@ -510,6 +519,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final boolean isConstraintApproach) {
 
         String name = (column.has("name")) ? column.get("name").getAsString() : null;
+        validateColumnName(name);
         final String type = (column.has("type")) ? column.get("type").getAsString().toLowerCase() : null;
         final Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
         final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
@@ -547,7 +557,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         sqlBuilder = sqlBuilder.append(", ");
     }
 
-    @Transactional
+	@Transactional
     @Override
     public CommandProcessingResult createDatatable(final JsonCommand command) {
 
@@ -661,6 +671,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final boolean isConstraintApproach) {
 
         String name = (column.has("name")) ? column.get("name").getAsString() : null;
+        validateColumnName(name);
         final String lengthStr = (column.has("length")) ? column.get("length").getAsString() : null;
         Integer length = (StringUtils.isNotBlank(lengthStr)) ? Integer.parseInt(lengthStr) : null;
         String newName = (column.has("newName")) ? column.get("newName").getAsString() : name;
@@ -758,6 +769,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final StringBuilder constrainBuilder, final Map<String, Long> codeMappings, final boolean isConstraintApproach) {
 
         String name = (column.has("name")) ? column.get("name").getAsString() : null;
+        validateColumnName(name);
         final String type = (column.has("type")) ? column.get("type").getAsString().toLowerCase() : null;
         final Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
         final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
@@ -802,6 +814,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final StringBuilder constrainBuilder, final List<String> codeMappings) {
         final String datatableAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
         final String name = (column.has("name")) ? column.get("name").getAsString() : null;
+        validateColumnName(name);
         //sqlBuilder = sqlBuilder.append(", DROP COLUMN `" + name + "`");
         final StringBuilder findFKSql = new StringBuilder();
         findFKSql.append("SELECT count(*)").append("FROM information_schema.TABLE_CONSTRAINTS i")
@@ -855,6 +868,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
         final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
         final String name = (column.has("name")) ? column.get("name").getAsString() : "";
+        validateColumnName(name);
         final String type = (mapColumnNameDefinition.containsKey(name)) ? mapColumnNameDefinition.get(name).getColumnType() : "";
 
         if (StringUtils.isNotEmpty(type)) {
