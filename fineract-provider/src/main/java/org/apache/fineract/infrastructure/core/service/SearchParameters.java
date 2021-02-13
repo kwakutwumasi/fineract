@@ -49,10 +49,10 @@ public final class SearchParameters {
     private final Long categoryId;
     private final boolean isSelfUser;
 	private static final String SEARCHPARAMPATTERN = "([a-zA-Z_\\.]+(\\s)*(=|(\\s)like(\\s)|(\\s)LIKE(\\s))(\\s)*"
-			+ "((['\"]{1}[%a-zA-Z0-9\\s]+['\"]+)|([\\d]+(\\.[\\d]{1,2})?)))"
+			+ "((['\"]{1}[%a-zA-Z0-9@_\\-\\.\\s]+['\"]+)|([\\d]+(\\.[\\d]{1,2})?)))"
 			+ "((\\s)*((\\s)and(\\s)|(\\s)or(\\s)|(\\s)AND(\\s)|(\\s)OR(\\s))"
 			+ "(\\s)*([a-zA-Z_\\.]+(\\s)*(=|(\\s)like(\\s)|(\\s)LIKE(\\s))"
-			+ "(\\s)*((['\"]{1}[%a-zA-Z0-9\\s]+['\"]+)|([\\d]+(\\.[\\d]{1,2})?))))*";	
+			+ "(\\s)*((['\"]{1}[%a-zA-Z0-9@_\\-\\.\\s]+['\"]+)|([\\d]+(\\.[\\d]{1,2})?))))*";	
 
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
