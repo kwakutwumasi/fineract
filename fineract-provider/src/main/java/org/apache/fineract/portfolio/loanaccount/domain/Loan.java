@@ -1544,7 +1544,7 @@ public class Loan extends AbstractPersistableCustom {
         final String loanTermFrequencyParamName = "loanTermFrequency";
         if (command.isChangeInIntegerParameterNamed(loanTermFrequencyParamName, this.termFrequency)) {
             final Integer newValue = command.integerValueOfParameterNamed(loanTermFrequencyParamName);
-            actualChanges.put(externalIdParamName, newValue);
+            actualChanges.put(loanTermFrequencyParamName, newValue);
             this.termFrequency = newValue;
         }
 
@@ -6558,4 +6558,12 @@ public class Loan extends AbstractPersistableCustom {
     public List<Rate> getRates() {
         return rates;
     }
+    
+    public String getExternalId() {
+		return externalId;
+	}
+
+    public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}    
 }

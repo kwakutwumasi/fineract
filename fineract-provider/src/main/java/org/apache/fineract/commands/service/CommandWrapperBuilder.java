@@ -3164,4 +3164,19 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder savingsAccountModifyExternalId(final Long accountId) {
+        this.actionName = "UPDATESAVINGSEXTERNALID";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=modifyExternalId";
+        return this;
+    }
+
+    public CommandWrapperBuilder loanModifyExternalId(final Long loanId) {
+        this.actionName = "UPDATELOANSEXTERNALID";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }

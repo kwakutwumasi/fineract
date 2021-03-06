@@ -852,7 +852,7 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve Loan Application:\n" + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n" + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n" + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n" + "Allows you to assign Loan Officer for existing Loan.\n\n" + "Unassign a Loan Officer:\n" + "Allows you to unassign the Loan Officer.\n\n" + "Reject Loan Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the loan application\n\n" + "Applicant Withdraws from Loan Application:\n" + "Mandatory Fields: withdrawnOnDate\n" + "Allows the applicant to withdraw the loan application\n\n" + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n" + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer")
+    @ApiOperation(value = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal | Modify Loan External ID", httpMethod = "POST", notes = "Approve Loan Application:\n" + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n" + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n" + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n" + "Allows you to assign Loan Officer for existing Loan.\n\n" + "Unassign a Loan Officer:\n" + "Allows you to unassign the Loan Officer.\n\n" + "Reject Loan Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the loan application\n\n" + "Applicant Withdraws from Loan Application:\n" + "Mandatory Fields: withdrawnOnDate\n" + "Allows the applicant to withdraw the loan application\n\n" + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n" + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer\n\n" + "Modify Savings Account External ID:\n" + "Mandatory Fields: externalId")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class)})
     public String stateTransitions(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
@@ -877,9 +877,7 @@ public class LoansApiResource {
         } else if (is(commandParam, "disburseToSavings")) {
             final CommandWrapper commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
-
-        if (is(commandParam, "undoapproval")) {
+        } else if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoLoanApplicationApproval(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undodisbursal")) {
@@ -888,9 +886,7 @@ public class LoansApiResource {
         }else if (is(commandParam, "undolastdisbursal")) {
             final CommandWrapper commandRequest = builder.undoLastDisbursalLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
-
-        if (is(commandParam, "assignloanofficer")) {
+        } else if (is(commandParam, "assignloanofficer")) {
             final CommandWrapper commandRequest = builder.assignLoanOfficer(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "unassignloanofficer")) {
@@ -899,6 +895,9 @@ public class LoansApiResource {
         } else if (is(commandParam, "recoverGuarantees")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().recoverFromGuarantor(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "modifyExternalId")) {
+        	final CommandWrapper commandRequest = builder.loanModifyExternalId(loanId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }

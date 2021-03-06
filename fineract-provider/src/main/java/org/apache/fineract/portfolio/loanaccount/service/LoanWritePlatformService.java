@@ -107,5 +107,7 @@ public interface LoanWritePlatformService {
     CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
 
     CommandProcessingResult forecloseLoan(final Long loanId, JsonCommand command);
+    
+    CommandProcessingResult modifyExternalId(final Long loanId, JsonCommand command);
 
 }

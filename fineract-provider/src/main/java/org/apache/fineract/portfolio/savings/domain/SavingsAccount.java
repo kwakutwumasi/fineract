@@ -3141,4 +3141,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
             return allowOverdraft;
     }
 
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
+
 }

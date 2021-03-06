@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import static org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants.externalIdParameterName;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3019,5 +3021,23 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         }
 
+    }
+    
+    @Override
+    public CommandProcessingResult modifyExternalId(Long loanId, JsonCommand command) {
+        final Map<String, Object> actualChanges = new HashMap<>(1);
+        final Loan loanForUpdate = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        if (command.isChangeInStringParameterNamed(externalIdParameterName, loanForUpdate.getExternalId())) {
+        	final String newValue = command.stringValueOfParameterNamed(externalIdParameterName);
+        	actualChanges.put(externalIdParameterName, newValue);
+        	loanForUpdate.setExternalId(newValue);
+        }
+        
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanId) //
+                .withLoanId(loanId) //
+                .with(actualChanges) //
+                .build();
     }
 }

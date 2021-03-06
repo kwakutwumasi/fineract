@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeId
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.externalIdParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -1343,7 +1344,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .with(actualChanges) //
                 .build();
     }
-
+    
     @Override
     @Transactional
     public void setSubStatusInactive(Long savingsId) {
@@ -1565,4 +1566,24 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
 
     }
+    
+    @Override
+    public CommandProcessingResult modifyExternalId(Long savingsAccountId, JsonCommand command) {
+        final Map<String, Object> actualChanges = new HashMap<>(1);
+        final SavingsAccount savingsForUpdate = this.savingAccountRepositoryWrapper.findOneWithNotFoundDetection(savingsAccountId);
+        if (command.isChangeInStringParameterNamed(externalIdParamName, savingsForUpdate.getExternalId())) {
+        	final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
+        	actualChanges.put(externalIdParamName, newValue);
+        	savingsForUpdate.setExternalId(newValue);
+        }
+        
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsAccountId) //
+                .withSavingsId(savingsAccountId) //
+                .with(actualChanges) //
+                .build();
+    }
+
+
 }
